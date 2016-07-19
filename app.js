@@ -89,6 +89,7 @@ mailin.on('message', function (connection, data, content) {
 
         var arr1 = domain.split(".");
 
+        var accountname = arr[0];
         logger.debug("Domain - "+ domain);
 
         if(arr1.length > 2){
@@ -117,7 +118,7 @@ mailin.on('message', function (connection, data, content) {
 
 
 
-                        Email.findOne({company: company, tenant: tenant, _id: req.params.id}, function(err, email) {
+                        Email.findOne({company: company, tenant: tenant, name: accountname}, function(err, email) {
                             if (err) {
 
                                 jsonString = messageFormatter.FormatMessage(err, "Get Twitter Failed", false, undefined);
