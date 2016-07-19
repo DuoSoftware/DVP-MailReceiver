@@ -1,0 +1,28 @@
+{
+  "name": "dvp-mailreciver",
+  "version": "1.0.0",
+  "description": "SMTP receiver implimentation",
+  "main": "app.js",
+  "dependencies": {
+    "config": "^1.21.0",
+    "dvp-common": "^0.1.4",
+    "mongoose": "^4.5.5",
+    "request": "^2.73.0",
+    "stringformat": "^0.0.5",
+    "validator": "^5.4.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DuoSoftware/DVP-MailReceiver.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/DuoSoftware/DVP-MailReceiver/issues"
+  },
+  "homepage": "https://github.com/DuoSoftware/DVP-MailReceiver#readme"
+}
