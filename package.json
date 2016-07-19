@@ -6,7 +6,7 @@
   "dependencies": {
     "config": "^1.21.0",
     "dvp-common": "^0.1.4",
-    "dvp-mongomodels": "^1.5.1",
+    "dvp-mongomodels": "^1.5.2",
     "mailin": "^3.0.3",
     "mongoose": "^4.5.5",
     "request": "^2.73.0",

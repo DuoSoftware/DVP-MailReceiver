@@ -15,60 +15,14 @@ var Org = require('dvp-mongomodels/model/Organisation');
 var messageFormatter = require('dvp-common/CommonMessageGenerator/ClientMessageJsonFormatter.js');
 var Email = require('dvp-mongomodels/model/Email').Email;
 
-var mongoip=config.Mongo.ip;
-var mongoport=config.Mongo.port;
-var mongodb=config.Mongo.dbname;
-var mongouser=config.Mongo.user;
-var mongopass = config.Mongo.password;
+///////////////////////////////////////////////////////////////////remove//////////////////////////////////
+
+var fs = require('fs');
+var obj = JSON.parse(fs.readFileSync('mail', 'utf8'));
+var func = function (connection, data, content) {
 
 
-
-var mongoose = require('mongoose');
-var connectionstring = util.format('mongodb://%s:%s@%s:%d/%s',mongouser,mongopass,mongoip,mongoport,mongodb)
-
-
-mongoose.connection.on('error', function (err) {
-    logger.error(err);
-});
-
-mongoose.connection.on('disconnected', function() {
-    logger.error('Could not connect to database');
-});
-
-mongoose.connection.once('open', function() {
-    logger.info("Connected to db");
-});
-
-
-mongoose.connect(connectionstring);
-
-
-
-mailin.start({
-    port: 25,
-    disableWebhook: true // Disable the webhook posting.
-});
-
-
-mailin.on('authorizeUser', function(connection, username, password, done) {
-    if (username == "johnsmith" && password == "mysecret") {
-        done(null, true);
-    } else {
-        done(new Error("Unauthorized!"), false);
-    }
-});
-
-
-mailin.on('startMessage', function (connection) {
-
-    console.log(connection);
-});
-
-
-mailin.on('message', function (connection, data, content) {
-
-
-    logger.debug(data.toJSON());
+    //logger.debug(data.toJSON());
     logger.debug("DVP-SocialConnector.CreateTwitterAccount Internal method ");
     var jsonString;
     var receiver = data.to[0].address;
@@ -118,7 +72,7 @@ mailin.on('message', function (connection, data, content) {
 
 
 
-                        Email.findOne({company: company, tenant: tenant, name: accountname}, function(err, email) {
+                        Email.findOne({company: orgs.id, tenant: orgs.tenant, name: accountname}, function(err, email) {
                             if (err) {
 
                                 jsonString = messageFormatter.FormatMessage(err, "Get Twitter Failed", false, undefined);
@@ -165,7 +119,7 @@ mailin.on('message', function (connection, data, content) {
                                                 /////////////////////////////////////////////create ticket directly//////////////////////////
                                                 //CreateTicket("sms",sessionid,sessiondata["CompanyId"],sessiondata["TenantId"],smsData["type"], smsData["subject"], smsData["description"],smsData["priority"],smsData["tags"],function(success, result){});
 
-                                                CreateTicket("twitter", data. messageId,result.profile,company, tenant, ticket_type, data.subject,data.text, ticket_priority,ticket_tags, function (done) {
+                                                CreateTicket("email", data. messageId,result.profile,orgs.id, orgs.tenant, ticket_type, data.subject,data.text, ticket_priority,ticket_tags, function (done) {
 
                                                     if (done) {
 
@@ -190,7 +144,7 @@ mailin.on('message', function (connection, data, content) {
 
                                             } else {
 
-                                                logger.error("Create engagement failed " + item.id);
+                                                logger.error("Create engagement failed " );
                                                 jsonString = messageFormatter.FormatMessage(undefined, "No Twitter Found", false, undefined);
                                                 logger.info(jsonString);
                                             }
@@ -216,4 +170,59 @@ mailin.on('message', function (connection, data, content) {
 
     }
 
+}
+//func({},obj,{});
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+var mongoip=config.Mongo.ip;
+var mongoport=config.Mongo.port;
+var mongodb=config.Mongo.dbname;
+var mongouser=config.Mongo.user;
+var mongopass = config.Mongo.password;
+
+
+
+var mongoose = require('mongoose');
+var connectionstring = util.format('mongodb://%s:%s@%s:%d/%s',mongouser,mongopass,mongoip,mongoport,mongodb)
+
+
+mongoose.connection.on('error', function (err) {
+    logger.error(err);
 });
+
+mongoose.connection.on('disconnected', function() {
+    logger.error('Could not connect to database');
+});
+
+mongoose.connection.once('open', function() {
+    logger.info("Connected to db");
+});
+
+
+mongoose.connect(connectionstring);
+
+var mail =
+
+
+mailin.start({
+    port: 25,
+    disableWebhook: true // Disable the webhook posting.
+});
+
+
+mailin.on('authorizeUser', function(connection, username, password, done) {
+    if (username == "johnsmith" && password == "mysecret") {
+        done(null, true);
+    } else {
+        done(new Error("Unauthorized!"), false);
+    }
+});
+
+
+mailin.on('startMessage', function (connection) {
+
+    console.log(connection);
+});
+
+
+mailin.on('message', func);
