@@ -38,6 +38,7 @@ module.exports = {
     "vdomain": "localhost",
     "domain": "localhost",
     "port": "4647",
+    "queueName": "MAILOUT",
     "version": "1.0"
   },
 
@@ -48,6 +49,23 @@ module.exports = {
 
   },
 
+  "SMTP":{
+
+    "ip": "smtp.mandrillapp.com",
+    "port": "2525",
+    "user": "rangika@duosoftware.com",
+    "password": "5eTFMlNGlGnZ7xTmI3LAxQ"
+
+  },
+
+
+  "RabbitMQ":
+  {
+    "ip": "45.55.142.207",
+    "port": 5672,
+    "user": "guest",
+    "password": "guest"
+  },
 
   "Mongo":
   {

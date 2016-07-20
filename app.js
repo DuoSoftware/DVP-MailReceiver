@@ -15,6 +15,8 @@ var Org = require('dvp-mongomodels/model/Organisation');
 var messageFormatter = require('dvp-common/CommonMessageGenerator/ClientMessageJsonFormatter.js');
 var Email = require('dvp-mongomodels/model/Email').Email;
 
+var smtpconnector = require('./Workers/SMPTConnector');
+
 ///////////////////////////////////////////////////////////////////remove//////////////////////////////////
 
 var fs = require('fs');
@@ -31,9 +33,6 @@ var func = function (connection, data, content) {
     var ticket_type = 'question';
     var ticket_tags = [];
     var ticket_priority = 'low';
-
-
-
 
 
     logger.debug("Reciver - "+ receiver);
@@ -60,10 +59,6 @@ var func = function (connection, data, content) {
                     jsonString = messageFormatter.FormatMessage(err, "Get Organisations Successful", true, orgs);
                     logger.debug(jsonString);
                     if(orgs){
-
-
-
-
 
 
                         data.created_at = Date.now();
@@ -96,9 +91,9 @@ var func = function (connection, data, content) {
                                 }
 
 
-                                var email = EmailSession(data);
+                                var emailsession = EmailSession(data);
 
-                                email.save(function (err, engage) {
+                                emailsession.save(function (err, engage) {
                                     if (err) {
                                         jsonString = messageFormatter.FormatMessage(err, "Email save failed", false, undefined);
                                         logger.error(jsonString);
@@ -110,12 +105,7 @@ var func = function (connection, data, content) {
                                         ////////////////////////create engagement and create a ticket////////////////////////////////////////////////
                                         CreateEngagement('email', orgs.id,  orgs.tenant, data.from[0].address, data.to[0].address, 'inbound', data. messageId,  data.text,function(isSuccess, result){
 
-
-
-
                                             if (isSuccess) {
-
-
                                                 /////////////////////////////////////////////create ticket directly//////////////////////////
                                                 //CreateTicket("sms",sessionid,sessiondata["CompanyId"],sessiondata["TenantId"],smsData["type"], smsData["subject"], smsData["description"],smsData["priority"],smsData["tags"],function(success, result){});
 
@@ -149,13 +139,7 @@ var func = function (connection, data, content) {
                                                 logger.info(jsonString);
                                             }
 
-
-
-
                                         })
-
-
-
                                     }
                                 });
                             }
@@ -166,8 +150,6 @@ var func = function (connection, data, content) {
 
             });
         }
-
-
     }
 
 }
@@ -198,10 +180,9 @@ mongoose.connection.once('open', function() {
     logger.info("Connected to db");
 });
 
-
 mongoose.connect(connectionstring);
 
-var mail =
+
 
 
 mailin.start({
@@ -226,3 +207,14 @@ mailin.on('startMessage', function (connection) {
 
 
 mailin.on('message', func);
+
+
+
+
+
+
+
+
+
+
+

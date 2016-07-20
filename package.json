@@ -5,10 +5,14 @@
   "main": "app.js",
   "dependencies": {
     "config": "^1.21.0",
+    "dustjs-linkedin": "^2.7.2",
     "dvp-common": "^0.1.4",
     "dvp-mongomodels": "^1.5.2",
+    "juice": "^2.0.0",
     "mailin": "^3.0.3",
     "mongoose": "^4.5.5",
+    "node-uuid": "^1.4.7",
+    "nodemailer": "^2.5.0",
     "request": "^2.73.0",
     "stringformat": "^0.0.5",
     "validator": "^5.4.0"
