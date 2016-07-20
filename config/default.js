@@ -51,12 +51,24 @@ module.exports = {
 
   "SMTP":{
 
-    "ip": "smtp.mandrillapp.com",
-    "port": "2525",
-    "user": "rangika@duosoftware.com",
-    "password": "5eTFMlNGlGnZ7xTmI3LAxQ"
+    "ip": "duoowner.veery.cloud",
+    "port": "25",
+    "user": "sukitha",
+    "password": "aaaaa"
 
   },
+
+  /*
+   "SMTP":{
+
+   "ip": "smtp.mandrillapp.com",
+   "port": "2525",
+   "user": "rangika@duosoftware.com",
+   "password": "5eTFMlNGlGnZ7xTmI3LAxQ"
+
+   },
+
+   */
 
 
   "RabbitMQ":
