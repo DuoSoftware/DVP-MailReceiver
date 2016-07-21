@@ -16,8 +16,9 @@ var dust = require('dustjs-linkedin');
 var juice = require('juice');
 var logger = require('dvp-common/LogHandler/CommonLogHandler.js').logger;
 var messageFormatter = require('dvp-common/CommonMessageGenerator/ClientMessageJsonFormatter.js');
-
-
+var CreateEngagement = require('./common').CreateEngagement;
+var addressparser = require('addressparser');
+var util = require('util');
 
 var queueHost = format('amqp://{0}:{1}@{2}:{3}',config.RabbitMQ.user,config.RabbitMQ.password,config.RabbitMQ.ip,config.RabbitMQ.port);
 var queueName = config.Host.queueName;
@@ -85,11 +86,46 @@ queueConnection.on('ready', function () {
 transporter.on('idle', flushWaitingMessages);
 
 
-/*
+function SendMail(mailOptions, data){
+
+    transporter.sendMail(mailOptions, function (err, info) {
+        if (err) {
+            console.log('Message failed (%s): %s', data.deliveryTag, err.message);
+            setTimeout(function () {
+                data.ack.reject(true);
+            }, 1000);
+            return;
+        }
+        console.log('Message delivered (%s): %s', data.deliveryTag, info.response);
+        data.ack.acknowledge();
 
 
+        var from = addressparser(mailOptions.from);
+        var to = addressparser(mailOptions.to);
 
- */
+        if(util.isArray(to)){
+            mailOptions.to = to[0].address;
+        }
+
+
+        if(util.isArray(from)){
+
+            mailOptions.from = from[0].address;
+
+        }
+
+        CreateEngagement('email', data.message.company, data.message.tenant, mailOptions.from, mailOptions.to, 'outbound', info.messageId, data.message.subject,function(done){
+            if(done){
+                logger.debug("engagement created successfully");
+            }else{
+
+                logger.error("engagement creation failed");
+            }
+        })
+
+    });
+}
+
 
 function flushWaitingMessages() {
 
@@ -154,18 +190,7 @@ function flushWaitingMessages() {
                                             }else{
                                                 mailOptions.text = renderedTemplate;
                                             }
-                                            transporter.sendMail(mailOptions, function (err, info) {
-                                                if (err) {
-                                                    console.log('Message failed (%s): %s', data.deliveryTag, err.message);
-                                                    setTimeout(function () {
-                                                        data.ack.reject(true);
-                                                    }, 1000);
-                                                    return;
-                                                }
-                                                console.log('Message delivered (%s): %s', data.deliveryTag, info.response);
-                                                data.ack.acknowledge();
-                                            });
-
+                                            SendMail(mailOptions,data);
                                         }
 
                                     }
@@ -183,17 +208,7 @@ function flushWaitingMessages() {
                                         mailOptions.text = outRendered;
                                     }
 
-                                    transporter.sendMail(mailOptions, function (err, info) {
-                                        if (err) {
-                                            console.log('Message failed (%s): %s', data.deliveryTag, err.message);
-                                            setTimeout(function () {
-                                                data.ack.reject(true);
-                                            }, 1000);
-                                            return;
-                                        }
-                                        console.log('Message delivered (%s): %s', data.deliveryTag, info.response);
-                                        data.ack.acknowledge();
-                                    });
+                                    SendMail(mailOptions,data);
 
 
                                 }
@@ -219,17 +234,7 @@ function flushWaitingMessages() {
 
         }else{
 
-            transporter.sendMail(mailOptions, function (err, info) {
-                if (err) {
-                    console.log('Message failed (%s): %s', data.deliveryTag, err.message);
-                    setTimeout(function () {
-                        data.ack.reject(true);
-                    }, 1000);
-                    return;
-                }
-                console.log('Message delivered (%s): %s', data.deliveryTag, info.response);
-                data.ack.acknowledge();
-            });
+            SendMail(mailOptions,data);
 
         }
 

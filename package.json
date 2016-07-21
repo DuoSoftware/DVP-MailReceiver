@@ -4,6 +4,8 @@
   "description": "SMTP receiver implimentation",
   "main": "app.js",
   "dependencies": {
+    "addressparser": "^1.0.1",
+    "amqp": "^0.2.6",
     "config": "^1.21.0",
     "dustjs-linkedin": "^2.7.2",
     "dvp-common": "^0.1.4",
