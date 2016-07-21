@@ -39,7 +39,9 @@ module.exports = {
     "domain": "localhost",
     "port": "4647",
     "queueName": "MAILOUT",
-    "version": "1.0"
+    "version": "1.0",
+    "smtplistner": false,
+    "smtpsender": true
   },
 
   "LBServer" : {
@@ -49,16 +51,8 @@ module.exports = {
 
   },
 
-  "SMTP":{
 
-    "ip": "duoowner.veery.cloud",
-    "port": "25",
-    "user": "sukitha",
-    "password": "aaaaa"
 
-  },
-
-  /*
    "SMTP":{
 
    "ip": "smtp.mandrillapp.com",
@@ -68,7 +62,7 @@ module.exports = {
 
    },
 
-   */
+
 
 
   "RabbitMQ":

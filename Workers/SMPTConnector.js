@@ -30,7 +30,6 @@ var nodemailer= require('nodemailer');
 var smtpHost = {
     host: config.SMTP.ip,
     port: config.SMTP.port,
-    direct: true,
     pool: true,
     auth: {
         user: config.SMTP.user,
@@ -46,14 +45,8 @@ var smtpHost = {
 
 var waiting = [];
 
-/*
-var transporter = nodemailer.createTransport(smtpHost);
-*/
 
-var transporter = nodemailer.createTransport({
-    direct: true,
-    logger: true
-});
+var transporter = nodemailer.createTransport(smtpHost);
 
 
 var queueConnection = amqp.createConnection({
@@ -244,9 +237,9 @@ function flushWaitingMessages() {
     };
 
 
-//    while (transporter.isIdle() && waiting.length) {
+    while (transporter.isIdle() && waiting.length) {
         send(waiting.shift());
-//    }
+    }
 }
 
 
