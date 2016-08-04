@@ -72,7 +72,7 @@ module.exports = {
    "ip": "smtp.mandrillapp.com",
    "port": "2525",
    "user": "rangika@duosoftware.com",
-   "password": "5eTFMlNGlGnZ7xTmI3LAxQ"
+ 
 
    },
 
