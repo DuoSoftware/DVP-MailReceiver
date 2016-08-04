@@ -21,12 +21,9 @@ var addressparser = require('addressparser');
 var util = require('util');
 
 var queueHost = format('amqp://{0}:{1}@{2}:{3}',config.RabbitMQ.user,config.RabbitMQ.password,config.RabbitMQ.ip,config.RabbitMQ.port);
-var queueName = config.Host.queueName;
-
+var queueName = config.Host.emailQueueName;
 
 var nodemailer= require('nodemailer');
-
-
 
 var smtpHost = {
     host: config.SMTP.ip,
@@ -43,12 +40,9 @@ var smtpHost = {
     logger: false
 };
 
-
 var waiting = [];
 
-
 var transporter = nodemailer.createTransport(smtpHost);
-
 
 var queueConnection = amqp.createConnection({
     url: queueHost
@@ -82,9 +76,7 @@ queueConnection.on('ready', function () {
     });
 });
 
-
 transporter.on('idle', flushWaitingMessages);
-
 
 function SendMail(mailOptions, data){
 
@@ -107,7 +99,6 @@ function SendMail(mailOptions, data){
             mailOptions.to = to[0].address;
         }
 
-
         if(util.isArray(from)){
 
             mailOptions.from = from[0].address;
@@ -126,7 +117,6 @@ function SendMail(mailOptions, data){
     });
 }
 
-
 function flushWaitingMessages() {
 
     var send = function (data) {
@@ -139,6 +129,7 @@ function flushWaitingMessages() {
             subject: data.message.subject,
             text: data.message.body,
             html: data.message.body,
+            ticket: true,
             headers: {
                 "X-MC-Subaccount": "veery"
             }
@@ -161,60 +152,63 @@ function flushWaitingMessages() {
                             {
                                 logger.error("Error in rendering "+ errRendered);
                             }
-                            else
-                            {
+                            else {
 
-                                var renderedTemplate="";
-                                var juiceOptions={
-                                    applyStyleTags  :true
-                                }
 
-                                if(resPickTemp.styles.length>0)
-                                {
-                                    for(var i=0;i<resPickTemp.styles.length;i++)
-                                    {
-                                        if (i == 0)
-                                        {
-                                            renderedTemplate = outRendered;
-                                        }
+                                var compilesubid = uuid.v4();
+                                var compiledsub = dust.compile(resPickTemp.content.subject, compilesubid);
+                                dust.loadSource(compiledsub);
+                                dust.render(compiledsub, data.message.Parameters, function (errsubRendered, outsubRendered) {
 
-                                        //console.log(resPickTemp.styles[i].content);
-                                        logger.info("Rendering is success "+ resPickTemp.styles[i].content);
 
-                                        renderedTemplate=juice.inlineContent(renderedTemplate, resPickTemp.styles[i].content, juiceOptions);
-                                        if(i==(resPickTemp.styles.length-1))
-                                        {
+                                    mailOptions.subject = outsubRendered;
 
-                                            if(resPickTemp.filetype == 'html') {
-                                                mailOptions.html = renderedTemplate;
-                                            }else{
-                                                mailOptions.text = renderedTemplate;
+                                    var renderedTemplate = "";
+                                    var juiceOptions = {
+                                        applyStyleTags: true
+                                    }
+
+                                    if (resPickTemp.styles.length > 0) {
+                                        for (var i = 0; i < resPickTemp.styles.length; i++) {
+                                            if (i == 0) {
+                                                renderedTemplate = outRendered;
                                             }
-                                            SendMail(mailOptions,data);
+
+                                            //console.log(resPickTemp.styles[i].content);
+                                            logger.info("Rendering is success " + resPickTemp.styles[i].content);
+
+                                            renderedTemplate = juice.inlineContent(renderedTemplate, resPickTemp.styles[i].content, juiceOptions);
+                                            if (i == (resPickTemp.styles.length - 1)) {
+
+                                                if (resPickTemp.filetype == 'html') {
+                                                    mailOptions.html = renderedTemplate;
+                                                } else {
+                                                    mailOptions.text = renderedTemplate;
+                                                }
+                                                SendMail(mailOptions, data);
+                                            }
+
                                         }
 
+
+                                    }
+                                    else {
+                                        console.log("Rendering Done");
+
+                                        if (resPickTemp.filetype == 'html') {
+                                            mailOptions.html = outRendered;
+                                        } else {
+                                            mailOptions.text = outRendered;
+                                        }
+
+                                        SendMail(mailOptions, data);
+
+
                                     }
 
-
-
-                                }
-                                else
-                                {
-                                    console.log("Rendering Done");
-
-                                    if(resPickTemp.filetype == 'html') {
-                                        mailOptions.html = outRendered;
-                                    }else{
-                                        mailOptions.text = outRendered;
-                                    }
-
-                                    SendMail(mailOptions,data);
-
-
-                                }
+                                });
 
                             }
-
 
                         });
 

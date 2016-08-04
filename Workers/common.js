@@ -63,7 +63,7 @@ function AddToRequest(company, tenant,session_id, priority, otherInfo, attribute
 
 };
 
-function CreateComment(company, tenant, engid, engagement, cb){
+function CreateComment(channel, channeltype,company, tenant, engid, engagement, cb){
 
     //http://localhost:3636/DVP/API/1.0.0.0/TicketByEngagement/754236638146859008/Comment
 
@@ -80,9 +80,9 @@ function CreateComment(company, tenant, engid, engagement, cb){
 
             body: engagement.body,
             body_type: "text",
-            type: "twitter mesage",
+            type: channeltype,
             public: true,
-            channel: "twitter",
+            channel: channel,
             channel_from: engagement.channel_from,
             engagement_session: engagement.engagement_id,
             author_external: engagement.profile_id

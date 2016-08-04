@@ -38,10 +38,24 @@ module.exports = {
     "vdomain": "localhost",
     "domain": "localhost",
     "port": "4647",
-    "queueName": "MAILOUT",
+    "emailQueueName": "MAILOUT",
+    "smsQueueName": "SMSOUT",
     "version": "1.0",
     "smtplistner": false,
-    "smtpsender": true
+    "smtpsender": true,
+    "smssender": true
+  },
+
+  "SMSServer":{
+
+
+    "ip":"159.203.109.43",
+    "port":"1401",
+    "password":"bar",
+    "user":"foo"
+
+
+
   },
 
   "LBServer" : {
