@@ -112,17 +112,23 @@ var func = function (connection, data, content) {
                                                 if(data.subject){
 
                                                     var arr = data.subject.split(/[\s:]+/);
-                                                    logger.debug(arr);
+                                                    logger.debug("Test" + arr);
                                                     if(arr.length > 2 && arr[0] == 'Re'){
 
-                                                        CreateComment('email','text',company, tenant, arr[1], result, function (done) {
-                                                            if (!done) {
-                                                                logger.debug("comment created successfully");
-
-                                                            }else{
-                                                                logger.error("comment creation failed");
-                                                            }
-                                                        });
+                                                        logger.debug("comment");
+                                                        
+                                                        try {
+                                                            CreateComment('email','text',company, tenant, arr[1], result, function (done) {
+                                                                if (!done) {
+                                                                    logger.debug("comment created successfully");
+    
+                                                                }else{
+                                                                    logger.error("comment creation failed");
+                                                                }
+                                                            });
+                                                        }catch(ex){
+                                                         logger.error("Error in comment ", ex);
+                                                        }
 
                                                     }else{
 
