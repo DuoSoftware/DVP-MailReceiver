@@ -2,14 +2,10 @@
  * Created by a on 7/20/2016.
  */
 
-
-
 var format = require("stringformat");
 var amqp = require('amqp');
 var config = require('config');
 var uuid = require('node-uuid');
-
-
 var mongoose = require('mongoose');
 var Template = require('../Model/Template').Template;
 var dust = require('dustjs-linkedin');
@@ -19,6 +15,10 @@ var messageFormatter = require('dvp-common/CommonMessageGenerator/ClientMessageJ
 var CreateEngagement = require('./common').CreateEngagement;
 var addressparser = require('addressparser');
 var util = require('util');
+
+
+var Org = require('dvp-mongomodels/model/Organisation');
+var Email = require('dvp-mongomodels/model/Email').Email;
 
 var queueHost = format('amqp://{0}:{1}@{2}:{3}',config.RabbitMQ.user,config.RabbitMQ.password,config.RabbitMQ.ip,config.RabbitMQ.port);
 var queueName = config.Host.emailQueueName;
@@ -58,9 +58,9 @@ queueConnection.on('ready', function () {
 
             message = JSON.parse(message.data.toString());
 
-            if (!message || !message.to || !message.from || !message.subject || !message.body || !message.company || !message.tenant) {
+            if (!message || !message.to || !message.from || !message.subject || !message.company || !message.tenant) {
                 console.log('Invalid message, skipping');
-                return ack.reject();
+                return ack.acknowledge();
             }
             ///////////////////////////create body/////////////////////////////////////////////////
 
@@ -123,90 +123,126 @@ function flushWaitingMessages() {
 
         /////////////////////////////////////////////send message(template)/////////////////////////////////////////////
 
-        var mailOptions = {
-            from: data.message.from,
-            to: data.message.to,
-            subject: data.message.subject,
-            text: data.message.body,
-            html: data.message.body,
-            ticket: true,
-            headers: {
-                "X-MC-Subaccount": "veery"
-            }
-        };
+        Org.findOne({tenant: data.message.tenant, id: data.message.company}, function(err, org) {
+            if (err) {
 
-        if(data.message.template){
-            Template.findOne({name:data.message.template,company:data.message.company,tenant:data.message.tenant},function (errPickTemplate,resPickTemp) {
+                logger.error("Organization didn't found", err);
+                data.ack.acknowledge();
 
+            }else{
+                if(org) {
 
-                if(!errPickTemplate){
+                    var mailOptions = {
+                        to: data.message.to,
+                        subject: data.message.subject,
+                        text: data.message.body,
+                        html: data.message.body,
+                        ticket: true,
+                        headers: {
+                            "X-MC-Subaccount": "veery"
+                        }
+                    };
 
-                    if(resPickTemp){
+                    ///thins to do/////////// get root from deployment/////////////////////////////////////
 
-                        var compileid = uuid.v4();
+                    mailOptions.from= format("{0}@duoworld.com", data.message.from);
 
-                        var compiled = dust.compile(resPickTemp.content.content, compileid);
-                        dust.loadSource(compiled);
-                        dust.render(compileid, data.message.Parameters, function(errRendered, outRendered) {
-                            if(errRendered)
-                            {
-                                logger.error("Error in rendering "+ errRendered);
-                            }
-                            else {
+                    if(data.message.template){
+                        Template.findOne({name:data.message.template,company:data.message.company,tenant:data.message.tenant},function (errPickTemplate,resPickTemp) {
 
 
-                                var compilesubid = uuid.v4();
-                                var compiledsub = dust.compile(resPickTemp.content.subject, compilesubid);
-                                dust.loadSource(compiledsub);
-                                dust.render(compiledsub, data.message.Parameters, function (errsubRendered, outsubRendered) {
+                            if(!errPickTemplate){
+
+                                if(resPickTemp && resPickTemp.content &&resPickTemp.content.content){
+
+                                    var compileid = uuid.v4();
+
+                                    var compiled = dust.compile(resPickTemp.content.content, compileid);
+                                    dust.loadSource(compiled);
+                                    dust.render(compileid, data.message.Parameters, function(errRendered, outRendered) {
+                                        if(errRendered)
+                                        {
+                                            logger.error("Error in rendering "+ errRendered);
+                                        }
+                                        else {
 
 
-                                    mailOptions.subject = outsubRendered;
-
-                                    var renderedTemplate = "";
-                                    var juiceOptions = {
-                                        applyStyleTags: true
-                                    }
-
-                                    if (resPickTemp.styles.length > 0) {
-                                        for (var i = 0; i < resPickTemp.styles.length; i++) {
-                                            if (i == 0) {
-                                                renderedTemplate = outRendered;
+                                            var renderedTemplate = "";
+                                            var juiceOptions = {
+                                                applyStyleTags: true
                                             }
 
-                                            //console.log(resPickTemp.styles[i].content);
-                                            logger.info("Rendering is success " + resPickTemp.styles[i].content);
+                                            if (resPickTemp.styles.length > 0) {
+                                                for (var i = 0; i < resPickTemp.styles.length; i++) {
+                                                    if (i == 0) {
+                                                        renderedTemplate = outRendered;
+                                                    }
 
-                                            renderedTemplate = juice.inlineContent(renderedTemplate, resPickTemp.styles[i].content, juiceOptions);
-                                            if (i == (resPickTemp.styles.length - 1)) {
+                                                    //console.log(resPickTemp.styles[i].content);
+                                                    logger.info("Rendering is success " + resPickTemp.styles[i].content);
 
-                                                if (resPickTemp.filetype == 'html') {
-                                                    mailOptions.html = renderedTemplate;
-                                                } else {
-                                                    mailOptions.text = renderedTemplate;
+                                                    renderedTemplate = juice.inlineContent(renderedTemplate, resPickTemp.styles[i].content, juiceOptions);
+                                                    if (i == (resPickTemp.styles.length - 1)) {
+
+                                                        if (resPickTemp.filetype.toLowerCase() == 'html') {
+                                                            mailOptions.html = renderedTemplate;
+                                                        } else {
+                                                            mailOptions.text = renderedTemplate;
+                                                        }
+
+                                                    }
+
                                                 }
+
+
+                                            }
+                                            else {
+                                                console.log("Rendering Done");
+
+                                                if (resPickTemp.filetype.toLowerCase() == 'html') {
+                                                    mailOptions.html = outRendered;
+                                                } else {
+                                                    mailOptions.text = outRendered;
+                                                }
+
+                                                //SendMail(mailOptions, data);
+
+
+                                            }
+
+
+                                            if (resPickTemp.content.subject) {
+
+
+                                                var compilesubid = uuid.v4();
+                                                var compiledsub = dust.compile(resPickTemp.content.subject, compilesubid);
+                                                dust.loadSource(compiledsub);
+                                                dust.render(compilesubid, data.message.Parameters, function (errsubRendered, outsubRendered) {
+
+                                                    mailOptions.subject = outsubRendered;
+                                                    SendMail(mailOptions, data);
+
+                                                });
+
+
+                                            } else {
+
                                                 SendMail(mailOptions, data);
                                             }
 
                                         }
 
+                                    });
 
-                                    }
-                                    else {
-                                        console.log("Rendering Done");
+                                }else{
 
-                                        if (resPickTemp.filetype == 'html') {
-                                            mailOptions.html = outRendered;
-                                        } else {
-                                            mailOptions.text = outRendered;
-                                        }
+                                    logger.error("No template found");
+                                }
 
-                                        SendMail(mailOptions, data);
+                            }else{
 
 
-                                    }
-
-                                });
+                                logger.error("Pick template failed ",errPickTemplate);
 
                             }
 
@@ -214,25 +250,24 @@ function flushWaitingMessages() {
 
                     }else{
 
-                        logger.error("No template found");
+                        SendMail(mailOptions,data);
+
                     }
+
+                    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
                 }else{
 
-
-                    logger.error("Pick template failed ",errPickTemplate);
-
+                    logger.error("No Organization found", err);
+                    data.ack.acknowledge();
                 }
+            }
 
-            });
+        });
 
-        }else{
 
-            SendMail(mailOptions,data);
 
-        }
 
-        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     };
 
 

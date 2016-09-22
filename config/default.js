@@ -38,7 +38,7 @@ module.exports = {
     "vdomain": "localhost",
     "domain": "localhost",
     "port": "4647",
-    "emailQueueName": "MAILOUT",
+    "emailQueueName": "EMAILOUT",
     "smsQueueName": "SMSOUT",
     "version": "1.0",
     "smtplistner": false,
@@ -72,7 +72,7 @@ module.exports = {
    "ip": "smtp.mandrillapp.com",
    "port": "2525",
    "user": "rangika@duosoftware.com",
- 
+   "password": "5eTFMlNGlGnZ7xTmI3LAxQ"
 
    },
 
@@ -83,8 +83,8 @@ module.exports = {
   {
     "ip": "45.55.142.207",
     "port": 5672,
-    "user": "guest",
-    "password": "guest"
+    "user": "admin",
+    "password": "admin"
   },
 
   "Mongo":
