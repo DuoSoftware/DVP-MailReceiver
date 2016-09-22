@@ -41,7 +41,7 @@ module.exports = {
     "emailQueueName": "EMAILOUT",
     "smsQueueName": "SMSOUT",
     "version": "1.0",
-    "smtplistner": false,
+    "smtplistner": true,
     "smtpsender": true,
     "smssender": true
   },
@@ -105,7 +105,7 @@ module.exports = {
       "resourceServiceVersion": "1.0.0.0",
 
 
-      "interactionurl": "127.0.0.1",
+      "interactionurl": "interactions@app.veery.cloud",
       "interactionport": '3637',
       "interactionversion":"1.0.0.0",
 
@@ -115,7 +115,7 @@ module.exports = {
       "cronversion":"1.0.0.0",
 
 
-      "ticketServiceHost": "127.0.0.1",
+      "ticketServiceHost": "liteticket@app.veery.cloud",
       "ticketServicePort": "3636",
       "ticketServiceVersion": "1.0.0.0",
 

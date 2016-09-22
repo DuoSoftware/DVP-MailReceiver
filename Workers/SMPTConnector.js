@@ -48,15 +48,20 @@ var queueConnection = amqp.createConnection({
     url: queueHost
 });
 
+queueConnection.on('error', function(e) {
+    console.log("Error from amqp: ", e);
+});
+
+
 queueConnection.on('ready', function () {
-    queueConnection.queue(queueName, function (q) {
+    queueConnection.queue(queueName, {durable: true, autoDelete: false},function (q) {
         q.bind('#');
         q.subscribe({
             ack: true,
             prefetchCount: 10
         }, function (message, headers, deliveryInfo, ack) {
 
-            message = JSON.parse(message.data.toString());
+            //message = JSON.parse(message.data.toString());
 
             if (!message || !message.to || !message.from || !message.subject || !message.company || !message.tenant) {
                 console.log('Invalid message, skipping');
@@ -145,7 +150,7 @@ function flushWaitingMessages() {
 
                     ///thins to do/////////// get root from deployment/////////////////////////////////////
 
-                    mailOptions.from= format("{0}@duoworld.com", data.message.from);
+                    mailOptions.from= format("{0}@veery.cloud", data.message.from);
 
                     if(data.message.template){
                         Template.findOne({name:data.message.template,company:data.message.company,tenant:data.message.tenant},function (errPickTemplate,resPickTemp) {
