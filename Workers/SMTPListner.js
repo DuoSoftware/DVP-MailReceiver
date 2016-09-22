@@ -24,6 +24,7 @@ var func = function (connection, data, content) {
 
     //logger.debug(data.toJSON());
     logger.debug("DVP-SocialConnector.CreateTwitterAccount Internal method ");
+    logger.debug(JSON.stringify(data));
     var jsonString;
     var receiver = data.to[0].address;
     var arr = receiver.split("@");
@@ -136,9 +137,7 @@ var func = function (connection, data, content) {
 
                                                             if (done) {
 
-
                                                                 logger.info("Add Request completed ");
-
                                                                 jsonString = messageFormatter.FormatMessage(undefined, "Add Request completed", true, undefined);
                                                                 logger.info(jsonString);
 
@@ -159,9 +158,7 @@ var func = function (connection, data, content) {
 
                                                         if (done) {
 
-
                                                             logger.info("Add Request completed ");
-
                                                             jsonString = messageFormatter.FormatMessage(undefined, "Add Request completed", true, undefined);
                                                             logger.info(jsonString);
 
@@ -176,12 +173,6 @@ var func = function (connection, data, content) {
                                                     });
 
                                                 }
-
-
-
-
-
-
 
                                                 //////////////////////////////////////first check in comments and update them////////////////////////////////////////////////////////////////
 

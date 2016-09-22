@@ -106,17 +106,12 @@ function SendRequest(company, tenant, mailoptions, cb){
                             }
                         });
                     }else{
-
                         return cb(false);
-
                     }
-
-
                 } else {
 
                     logger.error("Registration Failed "+_error);
                     return cb(false);
-
                 }
             }
             catch (excep) {
