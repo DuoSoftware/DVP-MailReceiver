@@ -119,7 +119,7 @@ var func = function (connection, data, content) {
                                                         
                                                         try {
                                                             CreateComment('email','text',data.company, data.tenant, arr[1], result, function (done) {
-                                                                if (!done) {
+                                                                if (done) {
                                                                     logger.debug("comment created successfully");
     
                                                                 }else{

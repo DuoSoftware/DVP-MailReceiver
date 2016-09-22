@@ -69,7 +69,7 @@ function CreateComment(channel, channeltype,company, tenant, engid, engagement, 
 
     if (config.Services && config.Services.ticketServiceHost && config.Services.ticketServicePort && config.Services.ticketServiceVersion) {
 
-        var url = format("http://{0}/DVP/API/{1}/TicketByEngagement/{2}/Comment", config.Services.ticketServiceHost, config.Services.ticketServiceVersion,engagement._id);
+        var url = format("http://{0}/DVP/API/{1}/TicketByEngagement/{2}/Comment", config.Services.ticketServiceHost, config.Services.ticketServiceVersion,engid);
         if (validator.isIP(config.Services.ticketServiceHost))
             url = format("http://{0}:{1}/DVP/API/{2}/TicketByEngagement/{3}/Comment", config.Services.ticketServiceHost, config.Services.ticketServicePort,config.Services.ticketServiceVersion, engid);
 
