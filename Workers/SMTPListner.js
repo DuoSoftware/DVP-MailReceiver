@@ -145,7 +145,7 @@ var func = function (connection, data, content) {
 
                                                             } else {
 
-                                                                logger.error("Add Request failed " + item.id);
+                                                                logger.error("Add Request failed ");
                                                                 jsonString = messageFormatter.FormatMessage(undefined, "No Twitter Found", false, undefined);
                                                                 logger.info(jsonString);
                                                             }
