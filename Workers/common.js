@@ -75,7 +75,7 @@ function CreateComment(channel, channeltype,company, tenant, engid, engagement, 
 
 
 
-        logger.debug("Enagagement is "+engagement);
+        logger.debug("Enagagement is "+engagement.toString());
 
         var data = {
 
