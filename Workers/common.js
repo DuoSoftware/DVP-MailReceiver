@@ -101,7 +101,7 @@ function CreateComment(channel, channeltype,company, tenant, engid, engagement, 
             json: data
         }, function (_error, _response, datax) {
 
-            logger.debug(_response);
+            logger.debug(_response.body);
             try {
 
                 if (!_error && _response && _response.statusCode == 200) {
