@@ -107,25 +107,74 @@ var func = function (connection, data, content) {
                                                 /////////////////////////////////////////////create ticket directly//////////////////////////
                                                 //CreateTicket("sms",sessionid,sessiondata["CompanyId"],sessiondata["TenantId"],smsData["type"], smsData["subject"], smsData["description"],smsData["priority"],smsData["tags"],function(success, result){});
 
-                                                CreateTicket("email", data. messageId,result.profile,orgs.id, orgs.tenant, ticket_type, data.subject,data.text, ticket_priority,ticket_tags, function (done) {
-
-                                                    if (done) {
 
 
-                                                        logger.info("Add Request completed ");
+                                                if(data.subject){
 
-                                                        jsonString = messageFormatter.FormatMessage(undefined, "Add Request completed", true, undefined);
-                                                        logger.info(jsonString);
+                                                    var arr = data.subject.split(/[\s:]+/);
+                                                    logger.debug(arr);
+                                                    if(arr.length > 2 && arr[0] == 'Re'){
+
+                                                        CreateComment('email','text',company, tenant, arr[1], result, function (done) {
+                                                            if (!done) {
+                                                                logger.debug("comment created successfully");
+
+                                                            }else{
+                                                                logger.error("comment creation failed");
+                                                            }
+                                                        });
+
+                                                    }else{
+
+                                                        CreateTicket("email", data. messageId,result.profile,orgs.id, orgs.tenant, ticket_type, data.subject,data.text, ticket_priority,ticket_tags, function (done) {
+
+                                                            if (done) {
 
 
-                                                    } else {
+                                                                logger.info("Add Request completed ");
 
-                                                        logger.error("Add Request failed " + item.id);
-                                                        jsonString = messageFormatter.FormatMessage(undefined, "No Twitter Found", false, undefined);
-                                                        logger.info(jsonString);
+                                                                jsonString = messageFormatter.FormatMessage(undefined, "Add Request completed", true, undefined);
+                                                                logger.info(jsonString);
+
+
+                                                            } else {
+
+                                                                logger.error("Add Request failed " + item.id);
+                                                                jsonString = messageFormatter.FormatMessage(undefined, "No Twitter Found", false, undefined);
+                                                                logger.info(jsonString);
+                                                            }
+
+                                                        });
+
                                                     }
+                                                }else{
 
-                                                });
+                                                    CreateTicket("email", data. messageId,result.profile,orgs.id, orgs.tenant, ticket_type, data.subject,data.text, ticket_priority,ticket_tags, function (done) {
+
+                                                        if (done) {
+
+
+                                                            logger.info("Add Request completed ");
+
+                                                            jsonString = messageFormatter.FormatMessage(undefined, "Add Request completed", true, undefined);
+                                                            logger.info(jsonString);
+
+
+                                                        } else {
+
+                                                            logger.error("Add Request failed " + item.id);
+                                                            jsonString = messageFormatter.FormatMessage(undefined, "No Twitter Found", false, undefined);
+                                                            logger.info(jsonString);
+                                                        }
+
+                                                    });
+
+                                                }
+
+
+
+
+
 
 
                                                 //////////////////////////////////////first check in comments and update them////////////////////////////////////////////////////////////////
