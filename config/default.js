@@ -105,7 +105,7 @@ module.exports = {
       "resourceServiceVersion": "1.0.0.0",
 
 
-      "interactionurl": "interactions@app.veery.cloud",
+      "interactionurl": "interactions.app.veery.cloud",
       "interactionport": '3637',
       "interactionversion":"1.0.0.0",
 
@@ -115,7 +115,7 @@ module.exports = {
       "cronversion":"1.0.0.0",
 
 
-      "ticketServiceHost": "liteticket@app.veery.cloud",
+      "ticketServiceHost": "liteticket.app.veery.cloud",
       "ticketServicePort": "3636",
       "ticketServiceVersion": "1.0.0.0",
 
