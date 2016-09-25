@@ -128,6 +128,71 @@ function CreateComment(channel, channeltype,company, tenant, engid, engagement, 
 
 };
 
+function CreateCommentByReference(channel, channeltype,company, tenant, ref, engagement, cb){
+
+    //http://localhost:3636/DVP/API/1.0.0.0/TicketByEngagement/754236638146859008/Comment
+
+    if (config.Services && config.Services.ticketServiceHost && config.Services.ticketServicePort && config.Services.ticketServiceVersion) {
+
+        var url = format("http://{0}/DVP/API/{1}/TicketByReference/{2}/Comment", config.Services.ticketServiceHost, config.Services.ticketServiceVersion,ref);
+        if (validator.isIP(config.Services.ticketServiceHost))
+            url = format("http://{0}:{1}/DVP/API/{2}/TicketByReference/{3}/Comment", config.Services.ticketServiceHost, config.Services.ticketServicePort,config.Services.ticketServiceVersion, ref);
+
+
+
+        logger.debug("Enagagement is ",engagement);
+
+        var data = {
+
+            body: engagement.body,
+            body_type: "text",
+            type: channeltype,
+            public: "public",
+            channel: channel,
+            channel_from: engagement.channel_from,
+            engagement_session: engagement.engagement_id,
+            author_external: engagement.profile_id
+
+
+        };
+
+
+        request({
+            method: "PUT",
+            url: url,
+            headers: {
+                authorization: "Bearer " + config.Services.accessToken,
+                companyinfo: format("{0}:{1}", tenant, company)
+            },
+            json: data
+        }, function (_error, _response, datax) {
+
+            logger.debug(_response.body);
+            try {
+
+                if (!_error && _response && _response.statusCode == 200) {
+
+                    logger.debug("Successfully registered");
+                    return cb(true);
+                } else {
+
+                    logger.error("Registration Failed "+_error);
+                    return cb(false);
+
+                }
+            }
+            catch (excep) {
+
+                logger.error("Registration Failed "+excep);
+                return cb(false);
+            }
+
+        });
+
+    }
+
+};
+
 function CreateEngagement(channel, company, tenant, from, to, direction, session, data,cb){
 
     if((config.Services && config.Services.interactionurl && config.Services.interactionport && config.Services.interactionversion)) {
@@ -308,3 +373,4 @@ module.exports.CreateComment = CreateComment;
 module.exports.CreateEngagement = CreateEngagement;
 module.exports.CreateTicket = CreateTicket;
 module.exports.RegisterCronJob = RegisterCronJob;
+module.exports.CreateCommentByReference = CreateCommentByReference;

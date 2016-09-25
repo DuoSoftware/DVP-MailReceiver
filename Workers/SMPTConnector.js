@@ -52,7 +52,6 @@ queueConnection.on('error', function(e) {
     console.log("Error from amqp: ", e);
 });
 
-
 queueConnection.on('ready', function () {
     queueConnection.queue(queueName, {durable: true, autoDelete: false},function (q) {
         q.bind('#');
@@ -61,7 +60,7 @@ queueConnection.on('ready', function () {
             prefetchCount: 10
         }, function (message, headers, deliveryInfo, ack) {
 
-            //message = JSON.parse(message.data.toString());
+            message = JSON.parse(message.data.toString());
 
             if (!message || !message.to || !message.from || !message.subject || !message.company || !message.tenant) {
                 console.log('Invalid message, skipping');
@@ -110,14 +109,19 @@ function SendMail(mailOptions, data){
 
         }
 
-        CreateEngagement('email', data.message.company, data.message.tenant, mailOptions.from, mailOptions.to, 'outbound', info.messageId, data.message.subject,function(done){
-            if(done){
-                logger.debug("engagement created successfully");
-            }else{
+        if(mailOptions.engagement) {
+            CreateEngagement('email', data.message.company, data.message.tenant, mailOptions.from, mailOptions.to, 'outbound', info.messageId, data.message.subject, function (done) {
+                if (done) {
+                    logger.debug("engagement created successfully");
+                } else {
 
-                logger.error("engagement creation failed");
-            }
-        })
+                    logger.error("engagement creation failed");
+                }
+            })
+        }else{
+
+            logger.debug("No engagement requested to be created");
+        }
 
     });
 }
@@ -143,6 +147,7 @@ function flushWaitingMessages() {
                         text: data.message.body,
                         html: data.message.body,
                         ticket: true,
+                        engagement: data.message.engagement,
                         headers: {
                             "X-MC-Subaccount": "veery"
                         }
@@ -151,6 +156,8 @@ function flushWaitingMessages() {
                     ///thins to do/////////// get root from deployment/////////////////////////////////////
 
                     mailOptions.from= format("{0}@veery.cloud", data.message.from);
+
+                    mailOptions.replyTo = format("{0}@{1}.veery.cloud", data.message.from, org.companyName);
 
                     if(data.message.template){
                         Template.findOne({name:data.message.template,company:data.message.company,tenant:data.message.tenant},function (errPickTemplate,resPickTemp) {
@@ -170,7 +177,6 @@ function flushWaitingMessages() {
                                             logger.error("Error in rendering "+ errRendered);
                                         }
                                         else {
-
 
                                             var renderedTemplate = "";
                                             var juiceOptions = {
@@ -194,12 +200,8 @@ function flushWaitingMessages() {
                                                         } else {
                                                             mailOptions.text = renderedTemplate;
                                                         }
-
                                                     }
-
                                                 }
-
-
                                             }
                                             else {
                                                 console.log("Rendering Done");
@@ -211,68 +213,42 @@ function flushWaitingMessages() {
                                                 }
 
                                                 //SendMail(mailOptions, data);
-
-
                                             }
 
-
                                             if (resPickTemp.content.subject) {
-
 
                                                 var compilesubid = uuid.v4();
                                                 var compiledsub = dust.compile(resPickTemp.content.subject, compilesubid);
                                                 dust.loadSource(compiledsub);
                                                 dust.render(compilesubid, data.message.Parameters, function (errsubRendered, outsubRendered) {
-
                                                     mailOptions.subject = outsubRendered;
                                                     SendMail(mailOptions, data);
-
                                                 });
-
 
                                             } else {
 
                                                 SendMail(mailOptions, data);
                                             }
-
                                         }
-
                                     });
-
                                 }else{
-
                                     logger.error("No template found");
                                 }
-
                             }else{
-
-
                                 logger.error("Pick template failed ",errPickTemplate);
-
                             }
-
                         });
-
                     }else{
-
                         SendMail(mailOptions,data);
-
                     }
-
                     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
                 }else{
 
                     logger.error("No Organization found", err);
                     data.ack.acknowledge();
                 }
             }
-
         });
-
-
-
-
     };
 
 
