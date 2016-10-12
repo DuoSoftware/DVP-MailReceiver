@@ -62,7 +62,12 @@ queueConnection.on('ready', function () {
 
             //message = JSON.parse(message.data.toString());
 
-            if (!message || !message.to || !message.from || !message.subject || !message.company || !message.tenant) {
+            if(!message.from ){
+
+                message.from = "no-reply";
+            }
+
+            if (!message || !message.to || !message.company || !message.tenant) {
                 console.log('Invalid message, skipping');
                 return ack.acknowledge();
             }
