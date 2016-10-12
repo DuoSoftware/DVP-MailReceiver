@@ -60,7 +60,7 @@ queueConnection.on('ready', function () {
             prefetchCount: 10
         }, function (message, headers, deliveryInfo, ack) {
 
-            message = JSON.parse(message.data.toString());
+            //message = JSON.parse(message.data.toString());
 
             if (!message || !message.to || !message.from || !message.subject || !message.company || !message.tenant) {
                 console.log('Invalid message, skipping');
