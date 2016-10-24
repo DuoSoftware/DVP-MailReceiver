@@ -67,7 +67,7 @@ queueConnection.on('ready', function () {
                 message.from = "no-reply";
             }
 
-            if (!message || !message.to || !message.company || !message.tenant) {
+            if (message === 'undefined' || message.to === 'undefined'|| message.company === 'undefined'  || message.tenant === 'undefined') {
                 console.log('Invalid message, skipping');
                 return ack.acknowledge();
             }
@@ -93,7 +93,7 @@ function SendMail(mailOptions, data){
         if (err) {
             console.log('Message failed (%s): %s', data.deliveryTag, err.message);
             setTimeout(function () {
-                data.ack.reject(true);
+                data.ack.acknowledge();
             }, 1000);
             return;
         }
