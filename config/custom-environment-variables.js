@@ -59,6 +59,25 @@ module.exports = {
         "port": "LB_PORT"
 
     },
+
+    "IMAP":
+    {
+        "username":"IMAP_USER_NAME",
+        "password":"IMAP_USER_PASSWORD",
+        "host":"IMAP_USER_HOST",
+        "port":"IMAP_USER_PORT",
+        "secure":true,
+        "mailbox":"IMAP_USER_MAILBOX",
+        "seen":true,
+        "company": "IMAP_USER_COMPANY",
+        "tenant": "IMAP_USER_TENAT",
+        "fetch":true
+
+
+    },
+
+
+
     "Services" : {
         "accessToken": "HOST_TOKEN",
         "resourceServiceHost": "SYS_RESOURCESERVICE_HOST",
@@ -69,7 +88,9 @@ module.exports = {
         "sipuserendpointserviceVersion": "SYS_SIPUSERENDPOINTSERVICE_VERSION",
         "clusterconfigserviceHost": "SYS_CLUSTERCONFIG_HOST",
         "clusterconfigservicePort": "SYS_CLUSTERCONFIG_PORT",
-        "clusterconfigserviceVersion": "SYS_CLUSTERCONFIG_VERSION"
+        "clusterconfigserviceVersion": "SYS_CLUSTERCONFIG_VERSION",
+        "uploadurl": "SYS_FILESERVICE_HOST",
+        "uploadport":"SYS_FILESERVICE_PORT",
     }
 };
 

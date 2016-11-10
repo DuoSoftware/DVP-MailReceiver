@@ -6,11 +6,13 @@
   "dependencies": {
     "addressparser": "^1.0.1",
     "amqp": "^0.2.6",
+    "async": "^2.1.2",
     "config": "^1.21.0",
     "dustjs-linkedin": "^2.7.2",
     "dvp-common": "^0.1.4",
     "dvp-mongomodels": "^1.5.2",
     "juice": "^2.0.0",
+    "mail-listener": "^0.7.1",
     "mailin": "^3.0.3",
     "mongoose": "^4.5.5",
     "node-uuid": "^1.4.7",

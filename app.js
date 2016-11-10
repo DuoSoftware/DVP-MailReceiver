@@ -22,6 +22,8 @@ if(config.Host.smtpsender)
     var smtpconnector = require('./Workers/SMPTConnector');
 
 
+if(config.Host.imaplistner)
+    var smtpconnector = require('./Workers/IMAPLIstner');
 
 var mongoip=config.Mongo.ip;
 var mongoport=config.Mongo.port;

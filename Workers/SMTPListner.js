@@ -71,7 +71,7 @@ var func = function (connection, data, content) {
                             if (err) {
 
                                 jsonString = messageFormatter.FormatMessage(err, "Get Twitter Failed", false, undefined);
-                                res.end(jsonString);
+                                //res.end(jsonString);
 
                             } else {
 
@@ -128,7 +128,7 @@ var func = function (connection, data, content) {
                                                     if(data.subject){
 
                                                         var arr = data.subject.split(/[\s:]+/);
-                                                        logger.debug("Test" + arr);
+                                                        logger.debug("subject split " + arr);
                                                         if(arr.length > 2 && arr[0] == 'Re'){
 
                                                             logger.debug("comment");
