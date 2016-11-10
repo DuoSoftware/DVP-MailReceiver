@@ -81,6 +81,15 @@ module.exports = {
 
     },
 
+    "SMTP":{
+
+        "ip": "SMTP_HOST",
+        "port": "SMTP_PORT",
+        "user": "SMTP_USER_NAME",
+        "password": "SMTP_PASSWORD"
+
+    },
+
 
 
     "Services" : {
@@ -88,14 +97,23 @@ module.exports = {
         "resourceServiceHost": "SYS_RESOURCESERVICE_HOST",
         "resourceServicePort": "SYS_RESOURCESERVICE_PORT",
         "resourceServiceVersion": "SYS_RESOURCESERVICE_VERSION",
-        "sipuserendpointserviceHost": "SYS_SIPUSERENDPOINTSERVICE_HOST",
-        "sipuserendpointservicePort": "SYS_SIPUSERENDPOINTSERVICE_PORT",
-        "sipuserendpointserviceVersion": "SYS_SIPUSERENDPOINTSERVICE_VERSION",
-        "clusterconfigserviceHost": "SYS_CLUSTERCONFIG_HOST",
-        "clusterconfigservicePort": "SYS_CLUSTERCONFIG_PORT",
-        "clusterconfigserviceVersion": "SYS_CLUSTERCONFIG_VERSION",
         "uploadurl": "SYS_FILESERVICE_HOST",
         "uploadport":"SYS_FILESERVICE_PORT",
+        "uploadurlVersion":"SYS_FILESERVICE_VERSION",
+
+        "interactionurl": "SYS_INTERACTION_HOST",
+        "interactionport": "SYS_INTERACTION_PORT",
+        "interactionversion":"SYS_INTERACTION_VERSION",
+
+
+        "cronurl": "SYS_SCHEDULEWORKER_HOST",
+        "cronport": "SYS_SCHEDULEWORKER_PORT",
+        "cronversion":"SYS_SCHEDULEWORKER_VERSION",
+
+
+        "ticketServiceHost": "SYS_LITETICKET_HOST",
+        "ticketServicePort":  "SYS_LITETICKET_PORT",
+        "ticketServiceVersion":  "SYS_LITETICKET_VERSION",
     }
 };
 
