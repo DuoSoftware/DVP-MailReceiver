@@ -160,6 +160,28 @@ function flushWaitingMessages() {
 
                     ///thins to do/////////// get root from deployment/////////////////////////////////////
 
+                    var attachments = [];
+
+                    if(data.message.attachments && util.isArray(data.message.attachments)){
+
+                        data.message.attachments.forEach(function(item){
+
+                            if(item.url && item.name){
+
+                                attachments.push({   // use URL as an attachment
+                                    filename: item.name,
+                                    path: item.url
+                                });
+                            }
+
+                        });
+
+                    }
+
+                    if(util.isArray(attachments) && attachments.length > 0) {
+                        mailOptions.attachments = attachments;
+                    }
+
                     mailOptions.from= format("{0}@veery.cloud", data.message.from);
 
                     mailOptions.replyTo = format("{0}@{1}.veery.cloud", data.message.from, org.companyName);
