@@ -34,6 +34,7 @@ module.exports = {
         "dbname":"SYS_MONGO_DB",
         "password":"SYS_MONGO_PASSWORD",
         "user":"SYS_MONGO_USER"
+
     },
 
     "RabbitMQ":
@@ -50,7 +51,11 @@ module.exports = {
         "vdomain": "LB_FRONTEND",
         "domain": "HOST_NAME",
         "port": "HOST_USERSERVICE_PORT",
-        "version": "HOST_VERSION"
+        "version": "HOST_VERSION",
+        "smtplistner": "HOST_ENABLE_SMTPLISTNER",
+        "smtpsender": "HOST_ENABLE_SMTPSENDER",
+        "smssender": "HOST_ENABLE_SMSSENDER",
+        "imaplistner": "HOST_ENABLE_IMAPLISTNER",
     },
 
     "LBServer" : {
@@ -63,14 +68,14 @@ module.exports = {
     "IMAP":
     {
         "username":"IMAP_USER_NAME",
-        "password":"IMAP_USER_PASSWORD",
-        "host":"IMAP_USER_HOST",
-        "port":"IMAP_USER_PORT",
+        "password":"IMAP_PASSWORD",
+        "host":"IMAP_HOST",
+        "port":"IMAP_PORT",
         "secure":true,
-        "mailbox":"IMAP_USER_MAILBOX",
+        "mailbox":"IMAP_MAILBOX",
         "seen":true,
-        "company": "IMAP_USER_COMPANY",
-        "tenant": "IMAP_USER_TENAT",
+        "company": "IMAP_COMPANY",
+        "tenant": "IMAP_TENAT",
         "fetch":true
 
 
