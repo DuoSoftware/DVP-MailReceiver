@@ -50,7 +50,7 @@ module.exports = {
     {
         "vdomain": "LB_FRONTEND",
         "domain": "HOST_NAME",
-        "port": "HOST_USERSERVICE_PORT",
+        "port": "HOST_MAILRECEIVER_PORT",
         "version": "HOST_VERSION",
         "smtplistner": "HOST_ENABLE_SMTPLISTNER",
         "smtpsender": "HOST_ENABLE_SMTPSENDER",
@@ -71,12 +71,12 @@ module.exports = {
         "password":"IMAP_PASSWORD",
         "host":"IMAP_HOST",
         "port":"IMAP_PORT",
-        "secure":true,
+        "secure":"IMAP_SECURITY",
         "mailbox":"IMAP_MAILBOX",
-        "seen":true,
+        "seen":"IMAP_SEEN",
         "company": "IMAP_COMPANY",
         "tenant": "IMAP_TENAT",
-        "fetch":true
+        "fetch":"IMAP_FETCH"
 
 
     },
@@ -101,9 +101,9 @@ module.exports = {
         "uploadport":"SYS_FILESERVICE_PORT",
         "uploadurlVersion":"SYS_FILESERVICE_VERSION",
 
-        "interactionurl": "SYS_INTERACTION_HOST",
-        "interactionport": "SYS_INTERACTION_PORT",
-        "interactionversion":"SYS_INTERACTION_VERSION",
+        "interactionurl": "SYS_INTERACTIONS_HOST",
+        "interactionport": "SYS_INTERACTIONS_PORT",
+        "interactionversion":"SYS_INTERACTIONS_VERSION",
 
 
         "cronurl": "SYS_SCHEDULEWORKER_HOST",
