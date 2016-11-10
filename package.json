@@ -13,6 +13,7 @@
     "dvp-mongomodels": "^1.5.2",
     "juice": "^2.0.0",
     "mail-listener": "^0.7.1",
+    "mail-listener2": "^0.2.0",
     "mailin": "^3.0.3",
     "mongoose": "^4.5.5",
     "node-uuid": "^1.4.7",
