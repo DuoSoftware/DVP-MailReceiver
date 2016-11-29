@@ -100,7 +100,7 @@ module.exports = {
   "IMAP":
   {
     "username":"duodemouser@gmail.com",
-    "password":"DuoS123456",
+    "password":"DuoX12345",
     "host":"imap.gmail.com",
     "port":993,
     "secure":true,
