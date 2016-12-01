@@ -260,9 +260,11 @@ function flushWaitingMessages() {
                                     });
                                 }else{
                                     logger.error("No template found");
+                                    data.ack.acknowledge();
                                 }
                             }else{
                                 logger.error("Pick template failed ",errPickTemplate);
+                                data.ack.acknowledge();
                             }
                         });
                     }else{
