@@ -90,7 +90,7 @@ module.exports = {
 
   "Mongo":
   {
-    "ip":"45.55.142.207",
+    "ip":"104.236.231.11",
     "port":"27017",
     "dbname":"dvpdb",
     "password":"DuoS123",
@@ -100,7 +100,7 @@ module.exports = {
   "IMAP":
   {
     "username":"duodemouser@gmail.com",
-    "password":"DuoX12345",
+    "password":"DuoZ4321",
     "host":"imap.gmail.com",
     "port":993,
     "secure":true,

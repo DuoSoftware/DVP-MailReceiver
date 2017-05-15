@@ -2,12 +2,10 @@
  * Created by a on 7/18/2016.
  */
 var mailin = require('mailin');
-var AddToRequest = require('./common').AddToRequest;
 var CreateComment = require('./common').CreateComment;
 var CreateCommentByReference = require('./common').CreateCommentByReference;
 var CreateEngagement = require('./common').CreateEngagement;
 var CreateTicket = require('./common').CreateTicket;
-var RegisterCronJob = require('./common').RegisterCronJob;
 var logger = require('dvp-common/LogHandler/CommonLogHandler.js').logger;
 var config = require('config');
 var util = require('util');
