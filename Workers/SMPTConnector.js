@@ -11,7 +11,7 @@ var Template = require('../Model/Template').Template;
 var dust = require('dustjs-linkedin');
 var juice = require('juice');
 var logger = require('dvp-common/LogHandler/CommonLogHandler.js').logger;
-var CreateEngagement = require('./common').CreateEngagement;
+var CreateEngagement = require('dvp-common/ServiceAccess/common').CreateEngagement;
 var addressparser = require('addressparser');
 var util = require('util');
 

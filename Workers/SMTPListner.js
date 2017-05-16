@@ -2,10 +2,14 @@
  * Created by a on 7/18/2016.
  */
 var mailin = require('mailin');
-var CreateComment = require('./common').CreateComment;
+var CreateComment =  require('dvp-common/ServiceAccess/common').CreateComment;
+//require('./common').CreateComment;
 var CreateCommentByReference = require('./common').CreateCommentByReference;
-var CreateEngagement = require('./common').CreateEngagement;
-var CreateTicket = require('./common').CreateTicket;
+var CreateEngagement = require('dvp-common/ServiceAccess/common').CreateEngagement;
+var CreateTicket = require('dvp-common/ServiceAccess/common').CreateTicket;
+
+
+
 var logger = require('dvp-common/LogHandler/CommonLogHandler.js').logger;
 var config = require('config');
 var util = require('util');
