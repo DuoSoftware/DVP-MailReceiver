@@ -105,7 +105,8 @@ var func = function (connection, data, content) {
                                         logger.info("Email saved successfully ...");
 
                                         ////////////////////////create engagement and create a ticket////////////////////////////////////////////////
-                                        CreateEngagement('email', orgs.id,  orgs.tenant, data.from[0].address, data.to[0].address, 'inbound', data. messageId,  data.text,function(isSuccess, result){
+                                        //channel, company, tenant, from, to, direction, session, data, user,channel_id,contact,  cb
+                                        CreateEngagement('email', orgs.id,  orgs.tenant, data.from[0].address, data.to[0].address, 'inbound', data. messageId,  data.text,undefined,undefined,undefined,function(isSuccess, result){
 
                                             if (isSuccess) {
                                                 /////////////////////////////////////////////create ticket directly//////////////////////////
