@@ -106,7 +106,7 @@ function CreateComment(channel, channeltype,company, tenant, engid, engagement, 
             json: data
         }, function (_error, _response, datax) {
 
-            logger.debug(_response.body);
+
             try {
 
                 if (!_error && _response && _response.statusCode == 200) {
@@ -172,7 +172,7 @@ function CreateCommentWithAttachments(channel, channeltype,company, tenant, engi
             json: data
         }, function (_error, _response, datax) {
 
-            logger.debug(_response.body);
+
             try {
 
                 if (!_error && _response && _response.statusCode == 200) {
@@ -237,7 +237,7 @@ function CreateCommentByReference(channel, channeltype,company, tenant, ref, eng
             json: data
         }, function (_error, _response, datax) {
 
-            logger.debug(_response.body);
+
             try {
 
                 if (!_error && _response && _response.statusCode == 200) {
@@ -303,7 +303,7 @@ function CreateCommentByReferenceWithAttachments(channel, channeltype,company, t
             json: data
         }, function (_error, _response, datax) {
 
-            logger.debug(_response.body);
+
             try {
 
                 if (!_error && _response && _response.statusCode == 200) {
@@ -368,7 +368,6 @@ function CreateCommentByReferenceForUserWithAttachments(channel, channeltype,com
             json: data
         }, function (_error, _response, datax) {
 
-            logger.debug(_response.body);
             try {
 
                 if (!_error && _response && _response.statusCode == 200) {
@@ -385,6 +384,63 @@ function CreateCommentByReferenceForUserWithAttachments(channel, channeltype,com
             catch (excep) {
 
                 logger.error("Registration Failed "+excep);
+                return cb(false);
+            }
+
+        });
+
+    }
+
+};
+
+function ChangeTicketStatusByUser(company, tenant, ref, user, status, cb){
+
+    //http://localhost:3636/DVP/API/1.0.0.0/TicketByEngagement/754236638146859008/Comment
+
+    if (config.Services && config.Services.ticketServiceHost && config.Services.ticketServicePort && config.Services.ticketServiceVersion) {
+
+        var url = format("http://{0}/DVP/API/{1}/TicketByReference/{2}/StatusByUser", config.Services.ticketServiceHost, config.Services.ticketServiceVersion,ref);
+        if (validator.isIP(config.Services.ticketServiceHost))
+            url = format("http://{0}:{1}/DVP/API/{2}/TicketByReference/{3}/StatusByUser", config.Services.ticketServiceHost, config.Services.ticketServicePort,config.Services.ticketServiceVersion, ref);
+
+
+
+        //logger.debug("Enagagement is ",engagement);
+
+        var data = {
+
+            status: status,
+            user: user._id
+
+        };
+
+
+        request({
+            method: "PUT",
+            url: url,
+            headers: {
+                authorization: "Bearer " + config.Services.accessToken,
+                companyinfo: format("{0}:{1}", tenant, company)
+            },
+            json: data
+        }, function (_error, _response, datax) {
+
+            try {
+
+                if (!_error && _response && _response.statusCode == 200) {
+
+                    logger.debug("Successfully update status");
+                    return cb(true);
+                } else {
+
+                    logger.error("Update Status Failed "+_error);
+                    return cb(false);
+
+                }
+            }
+            catch (excep) {
+
+                logger.error("Update Status Failed "+excep);
                 return cb(false);
             }
 
@@ -432,7 +488,6 @@ function CreateCommentByReferenceForUser(channel, channeltype,company, tenant, r
             json: data
         }, function (_error, _response, datax) {
 
-            logger.debug(_response.body);
             try {
 
                 if (!_error && _response && _response.statusCode == 200) {
@@ -829,6 +884,7 @@ module.exports.CreateCommentByReferenceForUserWithAttachments = CreateCommentByR
 module.exports.CreateCommentByReferenceWithAttachments = CreateCommentByReferenceWithAttachments;
 module.exports.CreateTicketWithAttachments = CreateTicketWithAttachments;
 module.exports.CreateCommentWithAttachments = CreateCommentWithAttachments;
+module.exports.ChangeTicketStatusByUser = ChangeTicketStatusByUser;
 
 
 
