@@ -166,7 +166,7 @@ mailListener.on("mail", function(mail, seqno, attributes){
                                                         logger.error("Error in comment ", ex);
                                                     }
                                                 }else if (arr[0] == 'Stat') {
-                                                    logger.error("Add comment and change status ");
+                                                    logger.info("Add comment and change status ");
                                                     CreateCommentByReferenceForUserWithAttachments('email', 'text', mail.company, mail.tenant, arr[1], mail.from[0].address, mail.text, users, attach, function (done) {
                                                         if (done) {
                                                             logger.debug("comment created successfully");
@@ -182,13 +182,9 @@ mailListener.on("mail", function(mail, seqno, attributes){
                                                             } else {
                                                                 logger.error("status change failed");
                                                             }
-
-
-                                                        })
+                                                        });
                                                         /////////////////////////////////////////////Change Status///////////////////////////////////////////////////////
-
                                                     });
-
                                                 }
 
                                             } else {
