@@ -25,7 +25,13 @@ var queueName = config.Host.smsQueueName;
 
 
 var queueConnection = amqp.createConnection({
-    url: queueHost
+    url: queueHost,
+    heartbeat:10
+}, {
+    reconnect: true,
+    reconnectBackoffStrategy: 'linear',
+    reconnectExponentialLimit: 120000,
+    reconnectBackoffTime: 1000
 });
 
 queueConnection.on('ready', function () {

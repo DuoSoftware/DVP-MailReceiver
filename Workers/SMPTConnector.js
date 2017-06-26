@@ -44,7 +44,13 @@ var waiting = [];
 var transporter = nodemailer.createTransport(smtpHost);
 
 var queueConnection = amqp.createConnection({
-    url: queueHost
+    url: queueHost,
+    heartbeat:10
+}, {
+    reconnect: true,
+    reconnectBackoffStrategy: 'linear',
+    reconnectExponentialLimit: 120000,
+    reconnectBackoffTime: 1000
 });
 
 queueConnection.on('error', function(e) {
