@@ -43,8 +43,17 @@ var waiting = [];
 
 var transporter = nodemailer.createTransport(smtpHost);
 
+if(config.RabbitMQ.ip) {
+    config.RabbitMQ.ip = config.RabbitMQ.ip.split(",");
+}
+
 var queueConnection = amqp.createConnection({
-    url: queueHost,
+    host: config.RabbitMQ.ip,
+    port: config.RabbitMQ.port,
+    login: config.RabbitMQ.user,
+    password: config.RabbitMQ.password,
+    vhost: config.RabbitMQ.vhost,
+    noDelay: true,
     heartbeat:10
 }, {
     reconnect: true,

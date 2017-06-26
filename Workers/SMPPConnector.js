@@ -22,10 +22,18 @@ var queueHost = format('amqp://{0}:{1}@{2}:{3}',config.RabbitMQ.user,config.Rabb
 var queueName = config.Host.smsQueueName;
 
 
-
+if(config.RabbitMQ.ip) {
+    config.RabbitMQ.ip = config.RabbitMQ.ip.split(",");
+}
 
 var queueConnection = amqp.createConnection({
-    url: queueHost,
+    //url: queueHost,
+    host: config.RabbitMQ.ip,
+    port: config.RabbitMQ.port,
+    login: config.RabbitMQ.user,
+    password: config.RabbitMQ.password,
+    vhost: config.RabbitMQ.vhost,
+    noDelay: true,
     heartbeat:10
 }, {
     reconnect: true,
@@ -33,6 +41,7 @@ var queueConnection = amqp.createConnection({
     reconnectExponentialLimit: 120000,
     reconnectBackoffTime: 1000
 });
+
 
 queueConnection.on('ready', function () {
     queueConnection.queue(queueName, function (q) {
