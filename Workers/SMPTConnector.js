@@ -82,7 +82,7 @@ queueConnection.on('ready', function () {
                 message.from = "no-reply";
             }
 
-            if (message === 'undefined' || message.to === 'undefined'|| message.company === 'undefined'  || message.tenant === 'undefined') {
+            if (message === undefined || message.to === undefined|| message.company === undefined  || message.tenant === undefined) {
                 console.log('Invalid message, skipping');
                 return ack.acknowledge();
             }
