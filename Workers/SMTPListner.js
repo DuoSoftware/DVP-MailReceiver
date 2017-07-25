@@ -2,12 +2,14 @@
  * Created by a on 7/18/2016.
  */
 var mailin = require('mailin');
-var AddToRequest = require('./common').AddToRequest;
-var CreateComment = require('./common').CreateComment;
+var CreateComment =  require('dvp-common/ServiceAccess/common').CreateComment;
+//require('./common').CreateComment;
 var CreateCommentByReference = require('./common').CreateCommentByReference;
-var CreateEngagement = require('./common').CreateEngagement;
-var CreateTicket = require('./common').CreateTicket;
-var RegisterCronJob = require('./common').RegisterCronJob;
+var CreateEngagement = require('dvp-common/ServiceAccess/common').CreateEngagement;
+var CreateTicket = require('dvp-common/ServiceAccess/common').CreateTicket;
+
+
+
 var logger = require('dvp-common/LogHandler/CommonLogHandler.js').logger;
 var config = require('config');
 var util = require('util');
@@ -103,7 +105,8 @@ var func = function (connection, data, content) {
                                         logger.info("Email saved successfully ...");
 
                                         ////////////////////////create engagement and create a ticket////////////////////////////////////////////////
-                                        CreateEngagement('email', orgs.id,  orgs.tenant, data.from[0].address, data.to[0].address, 'inbound', data. messageId,  data.text,function(isSuccess, result){
+                                        //channel, company, tenant, from, to, direction, session, data, user,channel_id,contact,  cb
+                                        CreateEngagement('email', orgs.id,  orgs.tenant, data.from[0].address, data.to[0].address, 'inbound', data. messageId,  data.text,undefined,undefined,undefined,function(isSuccess, result){
 
                                             if (isSuccess) {
                                                 /////////////////////////////////////////////create ticket directly//////////////////////////

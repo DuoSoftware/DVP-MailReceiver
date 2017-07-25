@@ -10,10 +10,12 @@ var Email = require('dvp-mongomodels/model/Email').Email;
 var util = require('util');
 var EmailSession = require('dvp-mongomodels/model/MailSession').EmailSession;
 var logger = require('dvp-common/LogHandler/CommonLogHandler.js').logger;
-var CreateEngagement = require('./common').CreateEngagement;
+var CreateEngagement = require('dvp-common/ServiceAccess/common').CreateEngagement;
 var CreateCommentWithAttachments = require('./common').CreateCommentWithAttachments;
 var CreateCommentByReferenceWithAttachments = require('./common').CreateCommentByReferenceWithAttachments;
 var CreateCommentByReferenceForUserWithAttachments = require('./common').CreateCommentByReferenceForUserWithAttachments;
+var ChangeTicketStatusByUser  = require('./common').ChangeTicketStatusByUser;
+
 var CreateTicketWithAttachments = require('./common').CreateTicketWithAttachments;
 var UploadAttachments = require('./common').UploadAttachments;
 var User = require('dvp-mongomodels/model/User');
@@ -130,6 +132,7 @@ mailListener.on("mail", function(mail, seqno, attributes){
                         User.findOne(queryObject).select("-password")
                             .exec(function (err, users) {
                                 if (err) {
+                                    log.error("Error in get user", err)
 
                                     // jsonString = messageFormatter.FormatMessage(err, "Get User Failed", false, undefined);
 
@@ -141,14 +144,29 @@ mailListener.on("mail", function(mail, seqno, attributes){
 
                                             var arr = mail.subject.split(/[\s:]+/);
                                             logger.debug("subject split " + arr);
-                                            if (arr.length > 2 && arr[0] == 'Re') {
+                                            if (arr.length > 2) {
 
-                                                logger.debug("comment");
+                                                if(arr[0] == 'Re') {
+                                                    logger.debug("comment");
 
-                                                try {
+                                                    try {
+
+                                                        //CreateCommentByReferenceForUser(channel, channeltype,company, tenant, ref, from, body, user, cb)
+                                                        CreateCommentByReferenceForUserWithAttachments('email', 'text', mail.company, mail.tenant, arr[1], mail.from[0].address, mail.text, users, attach, function (done) {
+                                                            if (done) {
+                                                                logger.debug("comment created successfully");
+
+                                                            } else {
+                                                                logger.error("comment creation failed");
+                                                            }
+                                                        });
 
 
-                                                    //CreateCommentByReferenceForUser(channel, channeltype,company, tenant, ref, from, body, user, cb)
+                                                    } catch (ex) {
+                                                        logger.error("Error in comment ", ex);
+                                                    }
+                                                }else if (arr[0] == 'Stat') {
+                                                    logger.info("Add comment and change status ");
                                                     CreateCommentByReferenceForUserWithAttachments('email', 'text', mail.company, mail.tenant, arr[1], mail.from[0].address, mail.text, users, attach, function (done) {
                                                         if (done) {
                                                             logger.debug("comment created successfully");
@@ -156,11 +174,17 @@ mailListener.on("mail", function(mail, seqno, attributes){
                                                         } else {
                                                             logger.error("comment creation failed");
                                                         }
+
+                                                        ChangeTicketStatusByUser(mail.company, mail.tenant, arr[1], users,arr[2], function(done){
+                                                            if (done) {
+                                                                logger.debug("status change successfully");
+
+                                                            } else {
+                                                                logger.error("status change failed");
+                                                            }
+                                                        });
+                                                        /////////////////////////////////////////////Change Status///////////////////////////////////////////////////////
                                                     });
-
-
-                                                } catch (ex) {
-                                                    logger.error("Error in comment ", ex);
                                                 }
 
                                             } else {
@@ -175,8 +199,9 @@ mailListener.on("mail", function(mail, seqno, attributes){
                                         }
 
                                     } else {
+                                        //channel, company, tenant, from, to, direction, session, data, user,channel_id,contact,  cb
 
-                                        CreateEngagement('email', company, tenant, mail.from[0].address, mail.to[0].address, 'inbound', mail.messageId, mail.text, function (isSuccess, result) {
+                                        CreateEngagement('email', company, tenant, mail.from[0].address, mail.to[0].address, 'inbound', mail.messageId, mail.text, undefined, undefined, undefined, function (isSuccess, result) {
 
                                             if (isSuccess) {
                                                 /////////////////////////////////////////////create ticket directly//////////////////////////

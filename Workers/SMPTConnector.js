@@ -11,8 +11,7 @@ var Template = require('../Model/Template').Template;
 var dust = require('dustjs-linkedin');
 var juice = require('juice');
 var logger = require('dvp-common/LogHandler/CommonLogHandler.js').logger;
-var messageFormatter = require('dvp-common/CommonMessageGenerator/ClientMessageJsonFormatter.js');
-var CreateEngagement = require('./common').CreateEngagement;
+var CreateEngagement = require('dvp-common/ServiceAccess/common').CreateEngagement;
 var addressparser = require('addressparser');
 var util = require('util');
 
@@ -20,7 +19,7 @@ var util = require('util');
 var Org = require('dvp-mongomodels/model/Organisation');
 var Email = require('dvp-mongomodels/model/Email').Email;
 
-var queueHost = format('amqp://{0}:{1}@{2}:{3}',config.RabbitMQ.user,config.RabbitMQ.password,config.RabbitMQ.ip,config.RabbitMQ.port);
+//var queueHost = format('amqp://{0}:{1}@{2}:{3}',config.RabbitMQ.user,config.RabbitMQ.password,config.RabbitMQ.ip,config.RabbitMQ.port);
 var queueName = config.Host.emailQueueName;
 
 var nodemailer= require('nodemailer');
@@ -44,8 +43,24 @@ var waiting = [];
 
 var transporter = nodemailer.createTransport(smtpHost);
 
+var amqpIPs = [];
+if(config.RabbitMQ.ip) {
+    amqpIPs = config.RabbitMQ.ip.split(",");
+}
+
 var queueConnection = amqp.createConnection({
-    url: queueHost
+    host: amqpIPs,
+    port: config.RabbitMQ.port,
+    login: config.RabbitMQ.user,
+    password: config.RabbitMQ.password,
+    vhost: config.RabbitMQ.vhost,
+    noDelay: true,
+    heartbeat:10
+}, {
+    reconnect: true,
+    reconnectBackoffStrategy: 'linear',
+    reconnectExponentialLimit: 120000,
+    reconnectBackoffTime: 1000
 });
 
 queueConnection.on('error', function(e) {
@@ -67,7 +82,7 @@ queueConnection.on('ready', function () {
                 message.from = "no-reply";
             }
 
-            if (message === 'undefined' || message.to === 'undefined'|| message.company === 'undefined'  || message.tenant === 'undefined') {
+            if (message === undefined || message.to === undefined|| message.company === undefined  || message.tenant === undefined) {
                 console.log('Invalid message, skipping');
                 return ack.acknowledge();
             }
