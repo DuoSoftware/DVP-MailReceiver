@@ -8,7 +8,7 @@ var messageFormatter = require('dvp-common/CommonMessageGenerator/ClientMessageJ
 var format = require("stringformat");
 var Template = require('../Model/Template').Template;
 var uuid = require('node-uuid');
-var CreateEngagement = require('../Workers/common').CreateEngagement;
+var CreateEngagement = require('dvp-common/ServiceAccess/common').CreateEngagement;
 var CreateComment = require('../Workers/common').CreateComment;
 var dust = require('dustjs-linkedin');
 var juice = require('juice');
@@ -18,15 +18,30 @@ var validator = require('validator');
 
 
 
-var queueHost = format('amqp://{0}:{1}@{2}:{3}',config.RabbitMQ.user,config.RabbitMQ.password,config.RabbitMQ.ip,config.RabbitMQ.port);
+//var queueHost = format('amqp://{0}:{1}@{2}:{3}',config.RabbitMQ.user,config.RabbitMQ.password,config.RabbitMQ.ip,config.RabbitMQ.port);
 var queueName = config.Host.smsQueueName;
 
-
-
+var amqpIPs = [];
+if(config.RabbitMQ.ip) {
+    amqpIPs = config.RabbitMQ.ip.split(",");
+}
 
 var queueConnection = amqp.createConnection({
-    url: queueHost
+    //url: queueHost,
+    host: amqpIPs,
+    port: config.RabbitMQ.port,
+    login: config.RabbitMQ.user,
+    password: config.RabbitMQ.password,
+    vhost: config.RabbitMQ.vhost,
+    noDelay: true,
+    heartbeat:10
+}, {
+    reconnect: true,
+    reconnectBackoffStrategy: 'linear',
+    reconnectExponentialLimit: 120000,
+    reconnectBackoffTime: 1000
 });
+
 
 queueConnection.on('ready', function () {
     queueConnection.queue(queueName, function (q) {
@@ -82,7 +97,7 @@ function SendRequest(company, tenant, mailoptions, cb){
 
                         var sessionid=   arr[1].replace(/['"]+/g, '');
 
-                        CreateEngagement('sms', company, tenant, mailoptions.from, mailoptions.to, 'outbound', sessionid, mailoptions.text, function (done, result) {
+                        CreateEngagement('sms', company, tenant, mailoptions.from, mailoptions.to, 'outbound', sessionid, mailoptions.text,undefined, undefined, undefined, function (done, result) {
                             if (done) {
                                 logger.debug("engagement created successfully");
                                 if(mailoptions.reply_session){

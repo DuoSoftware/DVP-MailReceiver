@@ -9,23 +9,36 @@ module.exports = {
   },
 
 
-  "Redis":
-  {
-    "ip": "45.55.142.207",
-    "port": 6389,
-    "user": "duo",
-    "password": "DuoS123"
+   "Redis":
+    {
+        "mode":"sentinel",//instance, cluster, sentinel
+        "ip": "45.55.142.207",
+        "port": 6389,
+        "user": "duo",
+        "password": "DuoS123",
+        "sentinels":{
+            "hosts": "138.197.90.92,45.55.205.92,138.197.90.92",
+            "port":16389,
+            "name":"redis-cluster"
+        }
 
-  },
+    },
 
 
-  "Security":
-  {
-    "ip" : "45.55.142.207",
-    "port": 6389,
-    "user": "duo",
-    "password": "DuoS123"
-  },
+    "Security":
+    {
+
+        "ip" : "45.55.142.207",
+        "port": 6389,
+        "user": "duo",
+        "password": "DuoS123",
+        "mode":"sentinel",//instance, cluster, sentinel
+        "sentinels":{
+            "hosts": "138.197.90.92,45.55.205.92,138.197.90.92",
+            "port":16389,
+            "name":"redis-cluster"
+        }
+    },
 
 
   "Host":
@@ -85,12 +98,13 @@ module.exports = {
     "ip": "45.55.142.207",
     "port": 5672,
     "user": "admin",
-    "password": "admin"
+    "password": "admin",
+    "vhost":'/'
   },
 
   "Mongo":
   {
-    "ip":"45.55.142.207",
+    "ip":"104.236.231.11",
     "port":"27017",
     "dbname":"dvpdb",
     "password":"DuoS123",
@@ -100,7 +114,7 @@ module.exports = {
   "IMAP":
   {
     "username":"duodemouser@gmail.com",
-    "password":"DuoX12345",
+    "password":"DuoZ4321",
     "host":"imap.gmail.com",
     "port":993,
     "secure":true,
@@ -117,7 +131,7 @@ module.exports = {
 
 
     "Services" : {
-      "accessToken":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJzdWtpdGhhIiwianRpIjoiMTdmZTE4M2QtM2QyNC00NjQwLTg1NTgtNWFkNGQ5YzVlMzE1Iiwic3ViIjoiNTZhOWU3NTlmYjA3MTkwN2EwMDAwMDAxMjVkOWU4MGI1YzdjNGY5ODQ2NmY5MjExNzk2ZWJmNDMiLCJleHAiOjE4OTMzMDI3NTMsInRlbmFudCI6LTEsImNvbXBhbnkiOi0xLCJzY29wZSI6W3sicmVzb3VyY2UiOiJhbGwiLCJhY3Rpb25zIjoiYWxsIn1dLCJpYXQiOjE0NjEyOTkxNTN9.YiocvxO_cVDzH5r67-ulcDdBkjjJJDir2AeSe3jGYeA",
+      "accessToken":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJzdWtpdGhhIiwianRpIjoiYWEzOGRmZWYtNDFhOC00MWUyLTgwMzktOTJjZTY0YjM4ZDFmIiwic3ViIjoiNTZhOWU3NTlmYjA3MTkwN2EwMDAwMDAxMjVkOWU4MGI1YzdjNGY5ODQ2NmY5MjExNzk2ZWJmNDMiLCJleHAiOjE5MDIzODExMTgsInRlbmFudCI6LTEsImNvbXBhbnkiOi0xLCJzY29wZSI6W3sicmVzb3VyY2UiOiJhbGwiLCJhY3Rpb25zIjoiYWxsIn1dLCJpYXQiOjE0NzAzODExMTh9.Gmlu00Uj66Fzts-w6qEwNUz46XYGzE8wHUhAJOFtiRo",
 
 
       "resourceServiceHost": "resourceservice.104.131.67.21.xip.io",
@@ -135,7 +149,7 @@ module.exports = {
       "cronversion":"1.0.0.0",
 
 
-      "ticketServiceHost": "liteticket.app.veery.cloud",
+      "ticketServiceHost": "127.0.0.1",//liteticket.app.veery.cloud
       "ticketServicePort": "3636",
       "ticketServiceVersion": "1.0.0.0",
 
