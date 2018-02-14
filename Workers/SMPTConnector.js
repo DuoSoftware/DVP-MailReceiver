@@ -161,7 +161,146 @@ function flushWaitingMessages() {
             }else{
                 if(org) {
 
-                    var mailOptions = {
+                    Email.findOne({company: org.id, tenant: org.tenant, name:data.message.from}, function(err, email) {
+                        if (err) {
+
+                            logger.error("Organization emails didn't found", err);
+                            data.ack.acknowledge();
+
+                        } else {
+
+                            var mailOptions = {
+                                to: data.message.to,
+                                subject: data.message.subject,
+                                text: data.message.body,
+                                html: data.message.body,
+                                ticket: true,
+                                engagement: data.message.engagement,
+                                headers: {
+                                    "X-MC-Subaccount": "veery"
+                                }
+                            };
+
+                            mailOptions.from= format("{0}@facetone.com", data.message.from);
+                            mailOptions.replyTo = format("{0}@{1}.facetone.com", data.message.from, org.companyName);
+
+                            var attachments = [];
+
+                            if(email && email.fromOverwrite){
+                                mailOptions.from= email.fromOverwrite;
+                                mailOptions.replyTo = email.fromOverwrite;
+                                console.log("Overwrite Sender ............");
+                            }
+
+                            if(data.message.attachments && util.isArray(data.message.attachments)){
+
+                                data.message.attachments.forEach(function(item){
+
+                                    if(item.url && item.name){
+
+                                        attachments.push({   // use URL as an attachment
+                                            filename: item.name,
+                                            path: item.url
+                                        });
+                                    }
+
+                                });
+
+                            }
+
+                            if(util.isArray(attachments) && attachments.length > 0) {
+                                mailOptions.attachments = attachments;
+                            }
+                            if(data.message.template){
+                                Template.findOne({name:data.message.template,company:data.message.company,tenant:data.message.tenant},function (errPickTemplate,resPickTemp) {
+
+
+                                    if(!errPickTemplate){
+
+                                        if(resPickTemp && resPickTemp.content &&resPickTemp.content.content){
+
+                                            var compileid = uuid.v4();
+
+                                            var compiled = dust.compile(resPickTemp.content.content, compileid);
+                                            dust.loadSource(compiled);
+                                            dust.render(compileid, data.message.Parameters, function(errRendered, outRendered) {
+                                                if(errRendered)
+                                                {
+                                                    logger.error("Error in rendering "+ errRendered);
+                                                }
+                                                else {
+
+                                                    var renderedTemplate = "";
+                                                    var juiceOptions = {
+                                                        applyStyleTags: true
+                                                    }
+
+                                                    if (resPickTemp.styles.length > 0) {
+                                                        for (var i = 0; i < resPickTemp.styles.length; i++) {
+                                                            if (i == 0) {
+                                                                renderedTemplate = outRendered;
+                                                            }
+
+                                                            //console.log(resPickTemp.styles[i].content);
+                                                            logger.info("Rendering is success " + resPickTemp.styles[i].content);
+
+                                                            renderedTemplate = juice.inlineContent(renderedTemplate, resPickTemp.styles[i].content, juiceOptions);
+                                                            if (i == (resPickTemp.styles.length - 1)) {
+
+                                                                if (resPickTemp.filetype.toLowerCase() == 'html') {
+                                                                    mailOptions.html = renderedTemplate;
+                                                                } else {
+                                                                    mailOptions.text = renderedTemplate;
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                    else {
+                                                        console.log("Rendering Done");
+
+                                                        if (resPickTemp.filetype.toLowerCase() == 'html') {
+                                                            mailOptions.html = outRendered;
+                                                        } else {
+                                                            mailOptions.text = outRendered;
+                                                        }
+
+                                                        //SendMail(mailOptions, data);
+                                                    }
+
+                                                    if (resPickTemp.content.subject) {
+
+                                                        var compilesubid = uuid.v4();
+                                                        var compiledsub = dust.compile(resPickTemp.content.subject, compilesubid);
+                                                        dust.loadSource(compiledsub);
+                                                        dust.render(compilesubid, data.message.Parameters, function (errsubRendered, outsubRendered) {
+                                                            mailOptions.subject = outsubRendered;
+                                                            SendMail(mailOptions, data);
+                                                        });
+
+                                                    } else {
+
+                                                        SendMail(mailOptions, data);
+                                                    }
+                                                }
+                                            });
+                                        }else{
+                                            logger.error("No template found");
+                                            data.ack.acknowledge();
+                                        }
+                                    }else{
+                                        logger.error("Pick template failed ",errPickTemplate);
+                                        data.ack.acknowledge();
+                                    }
+                                });
+                            }else{
+                                SendMail(mailOptions,data);
+                            }
+                        }
+                    });
+
+
+
+                   /* var mailOptions = {
                         to: data.message.to,
                         subject: data.message.subject,
                         text: data.message.body,
@@ -284,7 +423,7 @@ function flushWaitingMessages() {
                         });
                     }else{
                         SendMail(mailOptions,data);
-                    }
+                    }*/
                     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                 }else{
 
