@@ -104,6 +104,11 @@ transporter.on('idle', flushWaitingMessages);
 
 function SendMail(mailOptions, data){
 
+    console.log("------------------------------------------");
+    console.log(mailOptions);
+    console.log("*****");
+    console.log(data);
+    console.log("------------------------------------------");
     transporter.sendMail(mailOptions, function (err, info) {
         if (err) {
             console.log('Message failed (%s): %s', data.deliveryTag, err.message);
