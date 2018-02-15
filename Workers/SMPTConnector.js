@@ -165,7 +165,8 @@ function flushWaitingMessages() {
 
             }else{
                 if(org) {
-
+                    console.log("-------------------------------org----------");
+                    console.log(org);
                     Email.findOne({company: org.id, tenant: org.tenant, name:data.message.from}, function(err, email) {
                         if (err) {
 
@@ -190,7 +191,7 @@ function flushWaitingMessages() {
                             mailOptions.replyTo = format("{0}@{1}.facetone.com", data.message.from, org.companyName);
 
                             var attachments = [];
-                            console.log("-------------------------------");
+                            console.log("-------------------------------email----------");
                             console.log(email);
                             if(email && email.fromOverwrite){
                                 mailOptions.from= email.fromOverwrite;
