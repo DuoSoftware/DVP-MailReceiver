@@ -106,8 +106,6 @@ function SendMail(mailOptions, data){
 
     console.log("------------------------------------------");
     console.log(mailOptions);
-    console.log("*****");
-    console.log(data);
     console.log("------------------------------------------");
     transporter.sendMail(mailOptions, function (err, info) {
         if (err) {
@@ -166,7 +164,9 @@ function flushWaitingMessages() {
             }else{
                 if(org) {
                     console.log("-------------------------------org----------");
-                    console.log(org);
+                    console.log(org.id);
+                    console.log(org.tenant);
+                    console.log(data.message.from);
                     Email.findOne({company: org.id, tenant: org.tenant, name:data.message.from}, function(err, email) {
                         if (err) {
 
@@ -190,7 +190,6 @@ function flushWaitingMessages() {
                             mailOptions.from= format("{0}@facetone.com", data.message.from);
                             mailOptions.replyTo = format("{0}@{1}.facetone.com", data.message.from, org.companyName);
 
-                            var attachments = [];
                             console.log("-------------------------------email----------");
                             console.log(email);
                             if(email && email.fromOverwrite){
@@ -198,6 +197,8 @@ function flushWaitingMessages() {
                                 mailOptions.replyTo = email.fromOverwrite;
                                 console.log("Overwrite Sender ............");
                             }
+
+                            var attachments = [];                           
 
                             if(data.message.attachments && util.isArray(data.message.attachments)){
 
