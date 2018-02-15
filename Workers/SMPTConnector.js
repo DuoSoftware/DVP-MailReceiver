@@ -190,7 +190,8 @@ function flushWaitingMessages() {
                             mailOptions.replyTo = format("{0}@{1}.facetone.com", data.message.from, org.companyName);
 
                             var attachments = [];
-
+                            console.log("-------------------------------");
+                            console.log(email);
                             if(email && email.fromOverwrite){
                                 mailOptions.from= email.fromOverwrite;
                                 mailOptions.replyTo = email.fromOverwrite;
