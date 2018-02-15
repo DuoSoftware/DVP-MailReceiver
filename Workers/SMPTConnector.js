@@ -187,8 +187,8 @@ function flushWaitingMessages() {
                             console.log("-------------------------------email----------");
                             console.log(email);
                             console.log("need to Overwrite Sender ............");
-                            console.log((email && email.fromOverwrite));
-                            if(email && email.fromOverwrite){
+                            console.log(!(email!=undefined && email.fromOverwrite!=undefined));
+                            if(!(email!=undefined && email.fromOverwrite!=undefined)){
                                 mailOptions.from= email.fromOverwrite;
                                 mailOptions.replyTo = email.fromOverwrite;
                                 console.log("Overwrite Sender ............");
