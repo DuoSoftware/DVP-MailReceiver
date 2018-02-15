@@ -184,11 +184,7 @@ function flushWaitingMessages() {
                             mailOptions.from= format("{0}@facetone.com", data.message.from);
                             mailOptions.replyTo = format("{0}@{1}.facetone.com", data.message.from, org.companyName);
 
-                            console.log("-------------------------------email----------");
-                            console.log(email);
-                            console.log("need to Overwrite Sender ............");
-                            console.log(!(email!=undefined && email.fromOverwrite!=undefined));
-                            if(!(email!=undefined && email.fromOverwrite!=undefined)){
+                            if((email!=undefined && email.fromOverwrite!=undefined)){
                                 mailOptions.from= email.fromOverwrite;
                                 mailOptions.replyTo = email.fromOverwrite;
                                 console.log("Overwrite Sender ............");
