@@ -104,9 +104,6 @@ transporter.on('idle', flushWaitingMessages);
 
 function SendMail(mailOptions, data){
 
-    console.log("------------------------------------------");
-    console.log(mailOptions);
-    console.log("------------------------------------------");
     transporter.sendMail(mailOptions, function (err, info) {
         if (err) {
             console.log('Message failed (%s): %s', data.deliveryTag, err.message);
@@ -163,10 +160,7 @@ function flushWaitingMessages() {
 
             }else{
                 if(org) {
-                    console.log("-------------------------------org----------");
-                    console.log(org.id);
-                    console.log(org.tenant);
-                    console.log(data.message.from);
+                   
                     Email.findOne({company: org.id, tenant: org.tenant, name:data.message.from}, function(err, email) {
                         if (err) {
 
@@ -192,6 +186,8 @@ function flushWaitingMessages() {
 
                             console.log("-------------------------------email----------");
                             console.log(email);
+                            console.log("need to Overwrite Sender ............");
+                            console.log((email && email.fromOverwrite));
                             if(email && email.fromOverwrite){
                                 mailOptions.from= email.fromOverwrite;
                                 mailOptions.replyTo = email.fromOverwrite;
