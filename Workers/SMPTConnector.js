@@ -103,7 +103,7 @@ queueConnection.on('ready', function () {
 transporter.on('idle', flushWaitingMessages);
 
 function SendMail(mailOptions, data) {
-
+    console.log("-------- Step 5 -------------");
     transporter.sendMail(mailOptions, function (err, info) {
         if (err) {
             console.log('Message failed (%s): %s', data.deliveryTag, err.message);
@@ -151,8 +151,9 @@ function flushWaitingMessages() {
     var send = function (data) {
 
         /////////////////////////////////////////////send message(template)/////////////////////////////////////////////
-
+        console.log("-------- Step 1 -------------");
         Org.findOne({ tenant: data.message.tenant, id: data.message.company }, function (err, org) {
+            console.log("-------- Step 2 -------------");
             if (err) {
 
                 logger.error("Organization didn't found", err);
@@ -160,9 +161,10 @@ function flushWaitingMessages() {
 
             } else {
                 if (org) {
-
-                    Email.findOne({ company: org.id, tenant: org.tenant, name: data.message.from }, function (err, email) {
-                        if (err) {
+                    console.log("-------- Step 3 -------------");
+                    Email.findOne({ company: data.message.company, tenant: data.message.tenant, name: data.message.from }, function (err, email) {
+                        console.log("-------- Step 4 -------------");
+                         if (err) {
 
                             logger.error("Organization emails didn't found", err);
                             data.ack.acknowledge();

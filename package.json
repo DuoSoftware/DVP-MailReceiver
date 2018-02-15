@@ -9,7 +9,7 @@
     "async": "^2.1.2",
     "config": "^1.21.0",
     "dustjs-linkedin": "^2.7.2",
-    "dvp-common": "1.1.0",
+    "dvp-common": "^1.2.0",
     "dvp-mongomodels": "^5.0.14",
     "juice": "^2.0.0",
     "mail-listener": "^0.7.1",
