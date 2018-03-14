@@ -9,12 +9,7 @@ var Email = require('dvp-mongomodels/model/Email').Email;
 
 if(config.Host.smtplistner)
     var smtpListner = require('./Workers/SMTPListner');
-if(config.Host.smtpsender)
-    var smtpconnector = require('./Workers/SMPTConnector');
 
-
-if(config.Host.imaplistner)
-    var imapListner = require('./Workers/IMAPLIstner');
 
 var util = require('util');
 var mongoip=config.Mongo.ip;

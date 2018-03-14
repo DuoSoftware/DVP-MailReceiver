@@ -57,7 +57,7 @@ module.exports = {
     "smtplistner": true,
     "smtpsender": true,
     "smssender": true,
-    "imaplistner": true
+    "imaplistner": false
   },
 
   "SMSServer":{
@@ -86,7 +86,7 @@ module.exports = {
    "ip": "smtp.mandrillapp.com",
    "port": "2525",
    "user": "rangika@duosoftware.com",
-   "password": "5eTFMlNGlGnZ7xTmI3LAxQ"
+   "password": "1254455"
 
    },
 
@@ -111,25 +111,6 @@ module.exports = {
     "user":"duo"
   },
 
-  "IMAP":
-  {
-    "username":"duodemouser@gmail.com",
-    "password":"DuoZ4321",
-    "host":"imap.gmail.com",
-    "port":993,
-    "secure":true,
-    "mailbox":"INBOX",
-    "seen":true,
-    "company": 103,
-    "tenant": 1,
-    "fetch":true
-
-
-  },
-
-
-
-
     "Services" : {
       "accessToken":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJzdWtpdGhhIiwianRpIjoiYWEzOGRmZWYtNDFhOC00MWUyLTgwMzktOTJjZTY0YjM4ZDFmIiwic3ViIjoiNTZhOWU3NTlmYjA3MTkwN2EwMDAwMDAxMjVkOWU4MGI1YzdjNGY5ODQ2NmY5MjExNzk2ZWJmNDMiLCJleHAiOjE5MDIzODExMTgsInRlbmFudCI6LTEsImNvbXBhbnkiOi0xLCJzY29wZSI6W3sicmVzb3VyY2UiOiJhbGwiLCJhY3Rpb25zIjoiYWxsIn1dLCJpYXQiOjE0NzAzODExMTh9.Gmlu00Uj66Fzts-w6qEwNUz46XYGzE8wHUhAJOFtiRo",
 
@@ -149,7 +130,7 @@ module.exports = {
       "cronversion":"1.0.0.0",
 
 
-      "ticketServiceHost": "127.0.0.1",//liteticket.app.veery.cloud
+      "ticketServiceHost": "liteticket.app.veery.cloud",//liteticket.app.veery.cloud
       "ticketServicePort": "3636",
       "ticketServiceVersion": "1.0.0.0",
 
