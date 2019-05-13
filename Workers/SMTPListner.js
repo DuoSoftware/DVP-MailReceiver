@@ -26,7 +26,7 @@ mailin.on('startMessage', function (connection) {
 });
 
 
-mailin.on('message', SMPTMailHandler.saveMSMPail);
+mailin.on('message', SMPTMailHandler.saveMail);
 
 
 
