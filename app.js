@@ -3,7 +3,6 @@
  */
 var logger = require('dvp-common/LogHandler/CommonLogHandler.js').logger;
 var config = require('config');
-var util = require('util');
 var restify = require('restify');
 var mandrillHandler = require('./MandrillHandler');
 if (config.Host.smtplistner)
@@ -27,6 +26,10 @@ server.use(restify.acceptParser(server.acceptable));
 server.use(restify.queryParser());
 server.use(restify.bodyParser());
 
+server.head('/DVP/API/:version/webhook/:webhookId', function (req, res, next) { // used to validate webhooks when Mandrill routes are added.
+    res.end();
+    return next();
+});
 
 server.post('/DVP/API/:version/webhook/:webhookId', function (req, res, next) {
     var mandrillEvents = JSON.parse(req.params.mandrill_events);

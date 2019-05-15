@@ -52,7 +52,7 @@ var saveMail = function (webhookId, mailObj) {
                         Email.findOne({
                             company: orgs.id,
                             tenant: orgs.tenant,
-                            name: accountname
+                            domain: domain
                         }, function (err, email) {
                             if (err) {
 
@@ -68,7 +68,7 @@ var saveMail = function (webhookId, mailObj) {
                                 };
                                 MailHandler.saveMail(SMPTMailObj);
                                 var jsonString = messageFormatter.FormatMessage(null, "Email successfully handled", true, undefined);
-                                logger.error(jsonString);
+                                logger.info(jsonString);
                                 resolve(jsonString);
                             }
 
