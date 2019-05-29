@@ -9,6 +9,8 @@ if (config.Host.smtplistner)
     var smtpListner = require('./Workers/SMTPListner');
 var mailHandler = require('./MailHandler');
 var mongomodels = require('dvp-mongomodels');
+var ValidateWebhook = require('./ValidateWebhook');
+var bodyParser = require('body-parser');
 
 
 var server = restify.createServer({
@@ -24,7 +26,7 @@ server.pre(restify.pre.userAgentConnection());
 
 server.use(restify.acceptParser(server.acceptable));
 server.use(restify.queryParser());
-server.use(restify.bodyParser());
+server.use(bodyParser.json({ verify: ValidateWebhook.verifyRequestSignature }));
 
 server.head('/DVP/API/:version/webhook/:webhookId', function (req, res, next) { // used to validate webhooks when Mandrill routes are added.
     res.end();
