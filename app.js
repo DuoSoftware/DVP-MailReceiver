@@ -22,11 +22,9 @@ server.use(restify.CORS());
 server.use(restify.fullResponse());
 server.pre(restify.pre.userAgentConnection());
 
-
-
 server.use(restify.acceptParser(server.acceptable));
 server.use(restify.queryParser());
-server.use(bodyParser.json({ verify: ValidateWebhook.verifyRequestSignature }));
+server.use(bodyParser.urlencoded({verify: ValidateWebhook.verifyRequestSignature}));
 
 server.head('/DVP/API/:version/webhook/:webhookId', function (req, res, next) { // used to validate webhooks when Mandrill routes are added.
     res.end();
@@ -34,14 +32,18 @@ server.head('/DVP/API/:version/webhook/:webhookId', function (req, res, next) { 
 });
 
 server.post('/DVP/API/:version/webhook/:webhookId', function (req, res, next) {
-    var mandrillEvents = JSON.parse(req.params.mandrill_events);
+    try {
+        var mandrillEvents = JSON.parse(req.body.mandrill_events);
 
-    if (mandrillEvents[0].event === "inbound") {
-        mandrillHandler.saveMail(req.params.webhookId, mandrillEvents[0]).then(function (result) {
-            res.end(result);
-        }).catch(function (err) {
-            res.end(err)
-        });
+        if (mandrillEvents[0].event === "inbound") {
+            mandrillHandler.saveMail(req.params.webhookId, mandrillEvents[0]).then(function (result) {
+                res.end(result);
+            }).catch(function (err) {
+                res.end(err)
+            });
+        }
+    } catch (e) {
+        console.log(e)
     }
 
     return next();
