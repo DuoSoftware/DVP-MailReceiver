@@ -52,6 +52,7 @@ var saveMail = function (webhookId, mailObj) {
                         Email.findOne({
                             company: orgs.id,
                             tenant: orgs.tenant,
+                            name: arr[0],
                             domain: domain
                         }, function (err, email) {
                             if (err) {
