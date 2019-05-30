@@ -26,15 +26,15 @@ var saveMail = function (EmailObj) {
     if (email) {
 
         if (email.ticket_type) {
-            ticket_type = ticket_type;
+            ticket_type = email.ticket_type;
         }
 
         if (email.ticket_tags) {
-            ticket_tags = ticket_tags;
+            ticket_tags = email.ticket_tags;
         }
 
         if (email.ticket_priority) {
-            ticket_priority = ticket_priority;
+            ticket_priority = email.ticket_priority;
         }
     }
 
