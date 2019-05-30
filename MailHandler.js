@@ -38,7 +38,7 @@ var saveMail = function (EmailObj) {
         }
     }
 
-
+    data.direction = 'inbound';
     var emailsession = EmailSession(data);
 
     emailsession.save(function (err, engage) {
