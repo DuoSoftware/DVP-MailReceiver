@@ -24,7 +24,11 @@ server.pre(restify.pre.userAgentConnection());
 
 server.use(restify.acceptParser(server.acceptable));
 server.use(restify.queryParser());
-server.use(bodyParser.urlencoded({verify: ValidateWebhook.verifyRequestSignature}));
+server.use(bodyParser.urlencoded({type: function (req) {
+        if(req.headers['content-type'] !== 'application/json'){
+            req.headers['content-type'] = 'application/json';
+        }
+        return true;},verify: ValidateWebhook.verifyRequestSignature}));
 
 server.head('/DVP/API/:version/webhook/:webhookId', function (req, res, next) { // used to validate webhooks when Mandrill routes are added.
     res.end();
