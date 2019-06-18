@@ -49,7 +49,8 @@ var saveMail = function (connection, data, content) {
                         Email.findOne({
                             company: orgs.id,
                             tenant: orgs.tenant,
-                            name: accountname
+                            name: accountname,
+                            active: true
                         }, function (err, email) {
                             if (err) {
 

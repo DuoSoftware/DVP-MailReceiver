@@ -53,7 +53,8 @@ var saveMail = function (webhookId, mailObj) {
                             company: orgs.id,
                             tenant: orgs.tenant,
                             name: arr[0],
-                            domain: domain
+                            domain: domain,
+                            active: true
                         }, function (err, email) {
                             if (err) {
 
