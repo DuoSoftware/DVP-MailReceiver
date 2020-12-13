@@ -5,10 +5,7 @@ var logger = require('dvp-common/LogHandler/CommonLogHandler.js').logger;
 var config = require('config');
 var restify = require('restify');
 var mandrillHandler = require('./MandrillHandler');
-if (config.Host.smtplistner)
-    var smtpListner = require('./Workers/SMTPListner');
-var mailHandler = require('./MailHandler');
-var mongomodels = require('dvp-mongomodels');
+var genericMailProviderHandler = require('./GenericMailProviderHandler');
 var ValidateWebhook = require('./ValidateWebhook');
 var bodyParser = require('body-parser');
 
@@ -53,12 +50,26 @@ server.post('/DVP/API/:version/webhook/:webhookId', function (req, res, next) {
     return next();
 });
 
+server.post('/DVP/API/:version/genericmail/:domain', function (req, res, next) {
+    try {
+        var genericMailProviderEvents = JSON.parse(req.body);
+
+        if (genericMailProviderEvents[0].event === "inbound") {
+            genericMailProviderHandler.saveMail(req.params.domain, genericMailProviderEvents[0]).then(function (result) {
+                res.end(result);
+            }).catch(function (err) {
+                res.end(err)
+            });
+        }
+    } catch (e) {
+        console.log(e)
+    }
+
+    return next();
+});
+
 
 var port = config.Host.port || 3000;
 server.listen(port, function () {
     logger.info("DVP-MailReceiver Server %s listening at %s", server.name, server.url);
 });
-
-
-
-
