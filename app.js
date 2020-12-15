@@ -8,6 +8,7 @@ var mandrillHandler = require('./MandrillHandler');
 var genericMailProviderHandler = require('./GenericMailProviderHandler');
 var ValidateWebhook = require('./ValidateWebhook');
 var bodyParser = require('body-parser');
+var mongomodels = require('dvp-mongomodels');
 
 
 var server = restify.createServer({
@@ -21,18 +22,21 @@ server.pre(restify.pre.userAgentConnection());
 
 server.use(restify.acceptParser(server.acceptable));
 server.use(restify.queryParser());
-server.use(bodyParser.urlencoded({type: function (req) {
-        if(req.headers['content-type'] !== 'application/json'){
-            req.headers['content-type'] = 'application/json';
-        }
-        return true;},verify: ValidateWebhook.verifyRequestSignature}));
+//server.use(restify.bodyParser());
 
-server.head('/DVP/API/:version/webhook/:webhookId', function (req, res, next) { // used to validate webhooks when Mandrill routes are added.
+server.head('/DVP/API/:version/webhook/:webhookId', ValidateWebhook.verifyRequestSignature, function (req, res, next) { // used to validate webhooks when Mandrill routes are added.
     res.end();
     return next();
 });
 
-server.post('/DVP/API/:version/webhook/:webhookId', function (req, res, next) {
+server.post('/DVP/API/:version/webhook/:webhookId', bodyParser.urlencoded({
+    type: function (req) {
+        if (req.headers['content-type'] !== 'application/json') {
+            req.headers['content-type'] = 'application/json';
+        }
+        return true;
+    }
+}), ValidateWebhook.verifyRequestSignature, function (req, res, next) {
     try {
         var mandrillEvents = JSON.parse(req.body.mandrill_events);
 
@@ -50,19 +54,22 @@ server.post('/DVP/API/:version/webhook/:webhookId', function (req, res, next) {
     return next();
 });
 
-server.post('/DVP/API/:version/genericmail/:domain', function (req, res, next) {
+server.post('/DVP/API/:version/webhook/genericmail/:domain', restify.bodyParser({ mapParams: false }), function (req, res, next) {
     try {
-        var genericMailProviderEvents = JSON.parse(req.body);
+        var genericMailProviderEvents = req.body;
 
-        if (genericMailProviderEvents[0].event === "inbound") {
-            genericMailProviderHandler.saveMail(req.params.domain, genericMailProviderEvents[0]).then(function (result) {
+        if (genericMailProviderEvents.direction === "inbound") {
+            genericMailProviderHandler.saveMail(req.params.domain, genericMailProviderEvents).then(function (result) {
                 res.end(result);
             }).catch(function (err) {
                 res.end(err)
             });
+        } else {
+            res.end(`Not an incoming message`);
         }
     } catch (e) {
-        console.log(e)
+        console.log(e);
+        res.end();
     }
 
     return next();

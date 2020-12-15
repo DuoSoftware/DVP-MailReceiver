@@ -9,11 +9,11 @@ var saveMail = function (domain, data) {
     return new Promise(function (resolve, reject) {
 
         console.log(data);
-        data.messageId = uuid.v4();
+        data.messageId = data.messageId || uuid.v4();
 
         try {
 
-            EmailProviderLookup.findOne({inbound_domain: domain}, function (err, webhook) {
+            EmailProviderLookup.findOne({ inbound_domain: domain }, function (err, webhook) {
                 if (err) {
                     var jsonString = messageFormatter.FormatMessage(err, "Get Mandrill webhook Failed", false, undefined);
                     logger.error(jsonString);
