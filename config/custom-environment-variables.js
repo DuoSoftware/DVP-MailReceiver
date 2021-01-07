@@ -14,7 +14,12 @@ module.exports = {
         "ip": "SYS_REDIS_HOST",
         "port": "SYS_REDIS_PORT",
         "user": "SYS_REDIS_USER",
-        "password": "SYS_REDIS_PASSWORD"
+        "password": "SYS_REDIS_PASSWORD",
+        "sentinels":{
+            "hosts": "SYS_REDIS_SENTINEL_HOSTS",
+            "port":"SYS_REDIS_SENTINEL_PORT",
+            "name":"SYS_REDIS_SENTINEL_NAME"
+        }
 
     },
 
@@ -23,7 +28,13 @@ module.exports = {
         "ip": "SYS_REDIS_HOST",
         "port": "SYS_REDIS_PORT",
         "user": "SYS_REDIS_USER",
-        "password": "SYS_REDIS_PASSWORD"
+        "password": "SYS_REDIS_PASSWORD",
+        "mode":"SYS_REDIS_MODE",
+        "sentinels":{
+            "hosts": "SYS_REDIS_SENTINEL_HOSTS",
+            "port":"SYS_REDIS_SENTINEL_PORT",
+            "name":"SYS_REDIS_SENTINEL_NAME"
+        }
 
     },
 
@@ -35,6 +46,18 @@ module.exports = {
         "password":"SYS_MONGO_PASSWORD",
         "user":"SYS_MONGO_USER"
 
+    },
+
+    "SMSServer":{
+
+
+        "ip": "SYS_SMSSERVER_HOST",
+        "port": "SYS_SMSSERVER_PORT",
+        "password": "SYS_SMSSERVER_PASSWORD",
+        "user": "SYS_SMSSERVER_USER",
+    
+    
+    
     },
 
     "RabbitMQ":
@@ -57,6 +80,9 @@ module.exports = {
         "smtpsender": "HOST_ENABLE_SMTPSENDER",
         "smssender": "HOST_ENABLE_SMSSENDER",
         "imaplistner": "HOST_ENABLE_IMAPLISTNER",
+        "smsQueueName": "SMS_QUEUE_NAME"
+       
+
     },
 
     "LBServer" : {
@@ -115,6 +141,9 @@ module.exports = {
         "ticketServiceHost": "SYS_LITETICKET_HOST",
         "ticketServicePort":  "SYS_LITETICKET_PORT",
         "ticketServiceVersion":  "SYS_LITETICKET_VERSION",
+        "ardsServiceHost": "SYS_ARDSSERVICE_HOST",
+        "ardsServicePort": "SYS_ARDSSERVICE_PORT",
+        "ardsServiceVersion": "SYS_ARDSLITESERVICE_VERSION",
     }
 };
 
