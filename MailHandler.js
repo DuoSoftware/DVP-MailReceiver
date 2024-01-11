@@ -1,8 +1,8 @@
-var CreateComment = require('dvp-common/ServiceAccess/common').CreateComment;
+var CreateComment = require('./Workers/common').CreateComment;
 //require('./common').CreateComment;
 var CreateCommentByReference = require('./Workers/common').CreateCommentByReference;
-var CreateEngagement = require('dvp-common/ServiceAccess/common').CreateEngagement;
-var CreateTicket = require('dvp-common/ServiceAccess/common').CreateTicket;
+var CreateEngagement = require('./Workers/common').CreateEngagement;
+var CreateTicket = require('./Workers/common').CreateTicket;
 
 var logger = require('dvp-common/LogHandler/CommonLogHandler.js').logger;
 var EmailSession = require('dvp-mongomodels/model/MailSession').EmailSession;
@@ -52,13 +52,15 @@ var saveMail = function (EmailObj) {
 
             ////////////////////////create engagement and create a ticket////////////////////////////////////////////////
             //channel, company, tenant, from, to, direction, session, data, user,channel_id,contact,  cb
-            CreateEngagement('email', orgs.id, orgs.tenant, data.from[0].address, data.to[0].address, 'inbound', data.messageId, data.text, undefined, undefined, undefined, function (isSuccess, result) {
+            CreateEngagement('email', orgs.id, orgs.tenant, data.from[0].address, data.to[0].address, 'inbound', data.messageId, data.text, function (isSuccess, result) {
 
                 if (isSuccess) {
                     /////////////////////////////////////////////create ticket directly//////////////////////////
                     //CreateTicket("sms",sessionid,sessiondata["CompanyId"],sessiondata["TenantId"],smsData["type"], smsData["subject"], smsData["description"],smsData["priority"],smsData["tags"],function(success, result){});
 
                     if (data.inReplyTo && data.inReplyTo.length > 0) {
+
+                        
 
                         try {
                             CreateComment('email', 'text', data.company, data.tenant, data.inReplyTo[0], result, function (done) {
@@ -97,7 +99,12 @@ var saveMail = function (EmailObj) {
 
                             } else {
 
-                                CreateTicket("email", data.messageId, result.profile, orgs.id, orgs.tenant, ticket_type, data.subject, data.text, ticket_priority, ticket_tags, function (done) {
+                                var user ={
+                                    id:0,
+                                    name:'frodood'
+                                }
+
+                                CreateTicket("email", data.messageId, result.profile, orgs.id, orgs.tenant, ticket_type, data.subject, data.text, ticket_priority, ticket_tags, user, function (done) {
 
                                     if (done) {
 

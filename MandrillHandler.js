@@ -63,12 +63,12 @@ var saveMail = function (webhookId, mailObj) {
                                 reject(jsonString);
 
                             } else {
-                                var SMPTMailObj = {
+                                var MailObj = {
                                     "orgs": orgs,
                                     "email": email,
                                     "data": data
                                 };
-                                MailHandler.saveMail(SMPTMailObj);
+                                MailHandler.saveMail(MailObj);
                                 var jsonString = messageFormatter.FormatMessage(null, "Email successfully handled", true, undefined);
                                 logger.info(jsonString);
                                 resolve(jsonString);
