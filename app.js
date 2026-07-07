@@ -30,6 +30,11 @@ server.use(bodyParser.urlencoded({type: function (req) {
         }
         return true;},verify: ValidateWebhook.verifyRequestSignature}));
 
+server.get("/health/live", function (req, res, next) {
+    res.send(200, "live");
+    return next();
+});
+
 server.head('/DVP/API/:version/webhook/:webhookId', function (req, res, next) { // used to validate webhooks when Mandrill routes are added.
     res.end();
     return next();
