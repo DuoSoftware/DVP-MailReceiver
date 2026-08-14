@@ -1,44 +1,41 @@
 module.exports = {
-  "DB": {
-    "Type":"postgres",
-    "User":"duo",
-    "Password":"DuoS123",
-    "Port":5432,
-    "Host":"localhost",
-    "Database":"dvpdb"
+   "DB":{
+        "type":"postgres",
+        "user":"duo",
+        "password":"DuoS123",
+        "database":"facetone",
+        "host":"172.16.25.32",
+        "port":"5432"
+    },
+
+
+  Redis: {
+    mode: "instance", //instance, cluster, sentinel
+    ip: "",
+    port: 6389,
+    user: "",
+    db: 2,
+    password: "",
+    sentinels: {
+      hosts: "",
+      port: 16389,
+      name: "redis-cluster"
+    }
   },
 
+  Security: {
+    ip: "",
+    port: 6389,
+    user: "",
+    password: "",
+    mode: "instance", //instance, cluster, sentinel
+    sentinels: {
+      hosts: "",
+      port: 16389,
+      name: "redis-cluster"
+    }
+  },
 
-   "Redis":
-    {
-        "mode":"sentinel",//instance, cluster, sentinel
-        "ip": "45.55.142.207",
-        "port": 6389,
-        "user": "duo",
-        "password": "DuoS123",
-        "sentinels":{
-            "hosts": "138.197.90.92,45.55.205.92,138.197.90.92",
-            "port":16389,
-            "name":"redis-cluster"
-        }
-
-    },
-
-
-    "Security":
-    {
-
-        "ip" : "45.55.142.207",
-        "port": 6389,
-        "user": "duo",
-        "password": "DuoS123",
-        "mode":"sentinel",//instance, cluster, sentinel
-        "sentinels":{
-            "hosts": "138.197.90.92,45.55.205.92,138.197.90.92",
-            "port":16389,
-            "name":"redis-cluster"
-        }
-    },
 
 
   "Host":
@@ -80,36 +77,30 @@ module.exports = {
   },
 
 
-
    "SMTP":{
-
-   "ip": "smtp.mandrillapp.com",
-   "port": "2525",
-   "user": "rangika@duosoftware.com",
-   "password": "5eTFMlNGlGnZ7xTmI3LAxQ"
-
+   "ip": "8e5gpvyrrkde.uemp.mail-manager-smtp.amazonaws.com",
+   "port": "587",
+   "user": "inp-zasdmjo5xy7537tuaakgznqh",
+   "password": "Duo$Smtp#26"
    },
-
-
-
 
   "RabbitMQ":
   {
-    "ip": "45.55.142.207",
+    "ip": "172.16.25.32",
     "port": 5672,
-    "user": "admin",
-    "password": "admin",
+    "user": "duo",
+    "password": "DuoS123",
     "vhost":'/'
   },
 
-  "Mongo":
-  {
-    "ip":"104.236.231.11",
-    "port":"27017",
-    "dbname":"dvpdb",
-    "password":"DuoS123",
-    "user":"duo"
-  },
+     "Mongo": {
+        "ip": "172.16.25.32",
+        "port": 27017,
+        "dbname": "facetone",
+        "password": "DuoS123",
+        "user": "duo",
+        "type": "mongodb",
+    },
 
     "Services" : {
       "accessToken":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJzdWtpdGhhIiwianRpIjoiYWEzOGRmZWYtNDFhOC00MWUyLTgwMzktOTJjZTY0YjM4ZDFmIiwic3ViIjoiNTZhOWU3NTlmYjA3MTkwN2EwMDAwMDAxMjVkOWU4MGI1YzdjNGY5ODQ2NmY5MjExNzk2ZWJmNDMiLCJleHAiOjE5MDIzODExMTgsInRlbmFudCI6LTEsImNvbXBhbnkiOi0xLCJzY29wZSI6W3sicmVzb3VyY2UiOiJhbGwiLCJhY3Rpb25zIjoiYWxsIn1dLCJpYXQiOjE0NzAzODExMTh9.Gmlu00Uj66Fzts-w6qEwNUz46XYGzE8wHUhAJOFtiRo",
