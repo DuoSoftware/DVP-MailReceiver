@@ -13,5 +13,5 @@ RUN git clone -b $VERSION_TAG https://github.com/DuoSoftware/DVP-MailReceiver.gi
 RUN cd /usr/local/src/mailreceiver;
 WORKDIR /usr/local/src/mailreceiver
 RUN npm install
-EXPOSE 8877
+EXPOSE 2525
 CMD [ "node", "/usr/local/src/mailreceiver/app.js" ]
