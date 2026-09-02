@@ -103,7 +103,7 @@ module.exports = {
     },
 
     "Services" : {
-      "accessToken":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJzdWtpdGhhIiwianRpIjoiYWEzOGRmZWYtNDFhOC00MWUyLTgwMzktOTJjZTY0YjM4ZDFmIiwic3ViIjoiNTZhOWU3NTlmYjA3MTkwN2EwMDAwMDAxMjVkOWU4MGI1YzdjNGY5ODQ2NmY5MjExNzk2ZWJmNDMiLCJleHAiOjE5MDIzODExMTgsInRlbmFudCI6LTEsImNvbXBhbnkiOi0xLCJzY29wZSI6W3sicmVzb3VyY2UiOiJhbGwiLCJhY3Rpb25zIjoiYWxsIn1dLCJpYXQiOjE0NzAzODExMTh9.Gmlu00Uj66Fzts-w6qEwNUz46XYGzE8wHUhAJOFtiRo",
+      "accessToken":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJmcm9kb29kIiwianRpIjoiMDIxYzQ4MWEtNTUxMC00MzlkLTk1YjgtZWY5OTY3MmY1ZmFhIiwic3ViIjoiNTZhOWU3NTlmYjA3MTkwN2EwMDAwMDAxMjVkOWU4MGI1YzdjNGY5ODQ2NmY5MjExNzk2ZWJmNDMiLCJleHAiOjIzMzQxMjMzNjAsInRlbmFudCI6LTEsImNvbXBhbnkiOi0xLCJzY29wZSI6W3sicmVzb3VyY2UiOiJhbGwiLCJhY3Rpb25zIjoiYWxsIn1dLCJpYXQiOjE0NzAyMDk3NjB9.Wh-E2OVg6nwsicj9yQdx92js6rPg6pzkZkmwk69FHmc",
 
 
       "resourceServiceHost": "resourceservice.104.131.67.21.xip.io",
@@ -111,7 +111,7 @@ module.exports = {
       "resourceServiceVersion": "1.0.0.0",
 
 
-      "interactionurl": "interactions.app.veery.cloud",
+      "interactionurl": "interactions.facetonelite.com",
       "interactionport": '3637',
       "interactionversion":"1.0.0.0",
 
@@ -121,16 +121,16 @@ module.exports = {
       "cronversion":"1.0.0.0",
 
 
-      "ticketServiceHost": "liteticket.app.veery.cloud",
+      "ticketServiceHost": "liteticket.facetonelite.com",
       "ticketServicePort": "3636",
       "ticketServiceVersion": "1.0.0.0",
 
-      "ardsServiceHost": "ardsliteservice.104.131.67.21.xip.io",
+      "ardsServiceHost": "ardsliteservice.facetonelite.com",
       "ardsServicePort": "8831",
       "ardsServiceVersion": "1.0.0.0",
 
 
-      "uploadurl": 'fileservice.app.veery.cloud',
+      "uploadurl": 'fileservice.facetonelite.com',
       "uploadport": '8888',
       "uploadurlVersion": "1.0.0.0"
 

@@ -99,12 +99,7 @@ var saveMail = function (EmailObj) {
 
                             } else {
 
-                                var user ={
-                                    id:0,
-                                    name:'frodood'
-                                }
-
-                                CreateTicket("email", data.messageId, result.profile, orgs.id, orgs.tenant, ticket_type, data.subject, data.text, ticket_priority, ticket_tags, user, function (done) {
+                                CreateTicket("email", data.messageId, result.profile, orgs.id, orgs.tenant, ticket_type, data.subject, data.text, ticket_priority, ticket_tags, function (done) {
 
                                     if (done) {
 

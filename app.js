@@ -9,8 +9,15 @@ if (config.Host.smtplistner)
     var smtpListner = require('./Workers/SMTPListner');
 var mailHandler = require('./MailHandler');
 var mongomodels = require('dvp-mongomodels');
-var ValidateWebhook = require('./ValidateWebhook');
 var bodyParser = require('body-parser');
+
+mongomodels.connection.once('open', function () {
+    logger.info("DVP-MailReceiver: Connected to MongoDB (%s:%s/%s)", config.Mongo.ip, config.Mongo.port, config.Mongo.dbname);
+});
+
+mongomodels.connection.on('error', function (err) {
+    logger.error("DVP-MailReceiver: MongoDB connection error - %s", err);
+});
 
 
 var server = restify.createServer({
@@ -24,20 +31,17 @@ server.pre(restify.pre.userAgentConnection());
 
 server.use(restify.acceptParser(server.acceptable));
 server.use(restify.queryParser());
-server.use(bodyParser.urlencoded({type: function (req) {
-        if(req.headers['content-type'] !== 'application/json'){
-            req.headers['content-type'] = 'application/json';
-        }
-        return true;},verify: ValidateWebhook.verifyRequestSignature}));
+server.use(bodyParser.json());
 
-server.head('/DVP/API/:version/webhook/:webhookId', function (req, res, next) { // used to validate webhooks when Mandrill routes are added.
+server.head('/DVP/API/:version/webhook/:webhookId', function (req, res, next) {
     res.end();
     return next();
 });
 
 server.post('/DVP/API/:version/webhook/:webhookId', function (req, res, next) {
     try {
-        var mandrillEvents = JSON.parse(req.body.mandrill_events);
+        var mandrillEvents = req.body;
+        logger.debug("DVP-MailReceiver: mandrillEvents - %s", JSON.stringify(mandrillEvents));
 
         if (mandrillEvents[0].event === "inbound") {
             mandrillHandler.saveMail(req.params.webhookId, mandrillEvents[0]).then(function (result) {
@@ -47,7 +51,7 @@ server.post('/DVP/API/:version/webhook/:webhookId', function (req, res, next) {
             });
         }
     } catch (e) {
-        console.log(e)
+        logger.error("DVP-MailReceiver: failed to process webhook body=%s error=%s", JSON.stringify(req.body), e);
     }
 
     return next();
