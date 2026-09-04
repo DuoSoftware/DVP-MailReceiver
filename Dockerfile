@@ -1,17 +1,25 @@
 #FROM ubuntu
 #RUN apt-get update
-#RUN apt-get install -y git nodejs npm nodejs-legacy
-#RUN git clone git:////github.com/DuoSoftware/DVP-MailReceiver.git /usr/local/src/mailreceiver
-#RUN cd /usr/local/src/mailreceiver; npm install
-#CMD ["nodejs", "/usr/local/src/mailreceiver/app.js"]
+#RUN apt-get install -y git nodejs npm
+#RUN git clone git://github.com/DuoSoftware/DVP-ARDSLiteService.git /usr/local/src/ardsliteservice
+#RUN cd /usr/local/src/ardsliteservice; npm install
+#CMD ["nodejs", "/usr/local/src/ardsliteservice/app.js"]
 
-#EXPOSE 8872
+#EXPOSE 8828
 
-FROM node:9.9.0
-ARG VERSION_TAG
-RUN git clone -b $VERSION_TAG https://github.com/DuoSoftware/DVP-MailReceiver.git /usr/local/src/mailreceiver
-RUN cd /usr/local/src/mailreceiver;
-WORKDIR /usr/local/src/mailreceiver
+# FROM node:9.9.0
+# ARG VERSION_TAG
+# RUN git clone -b $VERSION_TAG https://github.com/DuoSoftware/DVP-ARDSLiteService.git /usr/local/src/ardsliteservice
+# RUN cd /usr/local/src/ardsliteservice;
+# WORKDIR /usr/local/src/ardsliteservice
+# RUN npm install
+# EXPOSE 8828
+# CMD [ "node", "/usr/local/src/ardsliteservice/app.js" ]
+
+FROM node:10-alpine
+WORKDIR /usr/local/src/ardsliteservice
+COPY package*.json ./
 RUN npm install
+COPY . .
 EXPOSE 8877
-CMD [ "node", "/usr/local/src/mailreceiver/app.js" ]
+CMD [ "node", "app.js" ]
