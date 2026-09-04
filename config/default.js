@@ -47,7 +47,7 @@ module.exports = {
     "resource": "cluster",
     "vdomain": "localhost",
     "domain": "localhost",
-    "port": "4647",
+    "port": "8877",
     "emailQueueName": "EMAILOUT",
     "smsQueueName": "SMSOUT",
     "version": "1.0",
