@@ -51,7 +51,7 @@ module.exports = {
     "emailQueueName": "EMAILOUT",
     "smsQueueName": "SMSOUT",
     "version": "1.0",
-    "smtplistner": true,
+    "smtplistner": false,
     "smtpsender": true,
     "smssender": true,
     "imaplistner": false
