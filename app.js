@@ -39,7 +39,7 @@ server.head('/DVP/API/:version/webhook/:webhookId', function (req, res, next) {
 });
 
 server.post('/DVP/API/:version/webhook/:webhookId', function (req, res, next) {
-    logger.info("DVP-MailReceiver: webhook body=%s", JSON.stringify(req.body));
+    logger.info("DVP-MailReceiver: webhook body=%s", JSON.stringify(req));
     
     try {
         var mandrillEvents = req.body;
