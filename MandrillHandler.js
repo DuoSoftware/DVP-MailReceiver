@@ -8,7 +8,6 @@ var uuid = require('node-uuid');
 var saveMail = function (webhookId, mailObj) {
     return new Promise(function (resolve, reject) {
 
-        console.log(mailObj);
         var data = mailObj.msg;
         data.from = [];
         data.from[0] = {address: data.from_email, name: data.from_name};
@@ -26,6 +25,11 @@ var saveMail = function (webhookId, mailObj) {
                     var jsonString = messageFormatter.FormatMessage(err, "Get Mandrill webhook Failed", false, undefined);
                     logger.error(jsonString);
                     reject(jsonString)
+
+                } else if (!webhook) {
+                    var jsonString = messageFormatter.FormatMessage(null, "No webhook registered for domain " + webhookId, false, undefined);
+                    logger.error(jsonString);
+                    reject(jsonString);
 
                 } else {
                     var receiver = data.email;
@@ -78,6 +82,10 @@ var saveMail = function (webhookId, mailObj) {
                         });
 
 
+                    } else {
+                        var jsonString = messageFormatter.FormatMessage(null, "Invalid recipient address " + receiver, false, undefined);
+                        logger.error(jsonString);
+                        reject(jsonString);
                     }
 
                 }

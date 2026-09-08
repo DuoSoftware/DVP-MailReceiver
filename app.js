@@ -31,6 +31,7 @@ server.pre(restify.pre.userAgentConnection());
 
 server.use(restify.acceptParser(server.acceptable));
 server.use(restify.queryParser());
+server.use(bodyParser.urlencoded({extended: false}));
 server.use(bodyParser.json());
 
 server.head('/DVP/API/:version/webhook/:webhookId', function (req, res, next) {
@@ -39,11 +40,35 @@ server.head('/DVP/API/:version/webhook/:webhookId', function (req, res, next) {
 });
 
 server.post('/DVP/API/:version/webhook/:webhookId', function (req, res, next) {
-    logger.info("DVP-MailReceiver: webhook body=%s", JSON.stringify(req));
-    
     try {
-        var mandrillEvents = req.body;
-        logger.info("DVP-MailReceiver: mandrillEvents - %s", JSON.stringify(mandrillEvents));
+        var mandrillEvents;
+
+        if (req.body && typeof req.body.mandrill_events === 'string') {
+            // Real Mandrill webhook: mandrill_events is a body field, already URL-decoded by bodyParser.
+            mandrillEvents = JSON.parse(req.body.mandrill_events);
+        } else if (req.headers['mandrill_events']) {
+            // Fallback for test tools that send it as a header instead of a body field.
+            // Header values are NOT auto-decoded, and may carry an accidental "mandrill_events=" prefix.
+            var rawHeader = req.headers['mandrill_events'];
+            var prefix = 'mandrill_events=';
+            if (rawHeader.indexOf(prefix) === 0) {
+                rawHeader = rawHeader.substring(prefix.length);
+            }
+            mandrillEvents = JSON.parse(decodeURIComponent(rawHeader));
+        } else {
+            mandrillEvents = req.body;
+        }
+
+        var firstMsg = mandrillEvents[0] && mandrillEvents[0].msg;
+        if (firstMsg) {
+            logger.info(
+                "Incoming email received:\n  Email Subject: %s\n  From: %s\n  To: %s\n  Body: %s",
+                firstMsg.subject,
+                firstMsg.from_email,
+                firstMsg.email,
+                firstMsg.text
+            );
+        }
 
         if (mandrillEvents[0].event === "inbound") {
             mandrillHandler.saveMail(req.params.webhookId, mandrillEvents[0]).then(function (result) {
@@ -53,7 +78,7 @@ server.post('/DVP/API/:version/webhook/:webhookId', function (req, res, next) {
             });
         }
     } catch (e) {
-        logger.error("DVP-MailReceiver: failed to process webhook body=%s error=%s", JSON.stringify(req.body), e);
+        logger.error("DVP-MailReceiver: failed to process webhook - %s", e);
     }
 
     return next();

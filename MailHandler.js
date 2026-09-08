@@ -15,7 +15,7 @@ var saveMail = function (EmailObj) {
     var orgs = EmailObj.orgs;
     var email = EmailObj.email;
 
-    logger.debug(JSON.stringify(data));
+    logger.debug("DVP-MailReceiver: MailHandler received - from=%s to=%s subject=%s", data.from && data.from[0] && data.from[0].address, data.to && data.to[0] && data.to[0].address, data.subject);
     var jsonString;
 
     var ticket_type = 'question';
