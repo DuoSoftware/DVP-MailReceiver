@@ -40,6 +40,14 @@ server.head('/DVP/API/:version/webhook/:webhookId', function (req, res, next) {
 });
 
 server.post('/DVP/API/:version/webhook/:webhookId', function (req, res, next) {
+    logger.info(
+        "DVP-MailReceiver: webhook hit - webhookId=%s content-type=%s source=%s",
+        req.params.webhookId,
+        req.headers['content-type'],
+        (req.body && typeof req.body.mandrill_events === 'string') ? 'body' :
+            (req.headers['mandrill_events'] ? 'header' : 'none')
+    );
+
     try {
         var mandrillEvents;
 
@@ -59,26 +67,34 @@ server.post('/DVP/API/:version/webhook/:webhookId', function (req, res, next) {
             mandrillEvents = req.body;
         }
 
-        var firstMsg = mandrillEvents[0] && mandrillEvents[0].msg;
-        if (firstMsg) {
+        var event = mandrillEvents && mandrillEvents[0];
+
+        // Mandrill can send many event types (send/open/click/bounce/spam/etc), not just inbound
+        // mail - only treat it as mail to process into a ticket if it's really an inbound event
+        // that actually carries mail details (a recipient address at minimum).
+        var isInboundMail = !!(event && event.event === "inbound" && event.msg && event.msg.email);
+
+        if (isInboundMail) {
             logger.info(
                 "Incoming email received:\n  Email Subject: %s\n  From: %s\n  To: %s\n  Body: %s",
-                firstMsg.subject,
-                firstMsg.from_email,
-                firstMsg.email,
-                firstMsg.text
+                event.msg.subject,
+                event.msg.from_email,
+                event.msg.email,
+                event.msg.text
             );
-        }
 
-        if (mandrillEvents[0].event === "inbound") {
-            mandrillHandler.saveMail(req.params.webhookId, mandrillEvents[0]).then(function (result) {
+            mandrillHandler.saveMail(req.params.webhookId, event).then(function (result) {
                 res.end(result);
             }).catch(function (err) {
                 res.end(err)
             });
+        } else {
+            logger.info("DVP-MailReceiver: webhook ignored - not an inbound mail event (event=%s)", event && event.event);
+            res.end();
         }
     } catch (e) {
         logger.error("DVP-MailReceiver: failed to process webhook - %s", e);
+        res.end();
     }
 
     return next();

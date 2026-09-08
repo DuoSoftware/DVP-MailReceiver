@@ -5,6 +5,9 @@ var MandrillWebhook = require('dvp-mongomodels/model/MandrillWebhook').MandrillW
 module.exports.verifyRequestSignature = function (req, res, buf, encoding) {
     var signature = req.headers["x-mandrill-signature"];
 
+    console.log("signature - " + signature);
+    
+
     if (!signature) {
         // For testing, let's log an error. In production, you should throw an
         // error.
