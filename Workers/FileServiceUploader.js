@@ -51,32 +51,68 @@ function uploadAttachment(buffer, filename, contentType, tenant, company, cb) {
             return cb(new Error("File service returned status " + (response && response.statusCode)));
         }
 
-        var url;
+        var fileId;
         try {
             var parsed = (typeof body === 'string') ? JSON.parse(body) : body;
             // Best-effort extraction across a few common response shapes - once the
             // real response is seen in the log above, trim this to the exact one.
             if (parsed) {
-                if (parsed.ReturnedObject && parsed.ReturnedObject[0] && parsed.ReturnedObject[0].url) {
-                    url = parsed.ReturnedObject[0].url;
-                } else if (Array.isArray(parsed) && parsed[0] && parsed[0].url) {
-                    url = parsed[0].url;
-                } else if (parsed.data && parsed.data[0] && parsed.data[0].url) {
-                    url = parsed.data[0].url;
-                } else if (parsed.url) {
-                    url = parsed.url;
+                if (parsed.ReturnedObject && parsed.ReturnedObject[0] && parsed.ReturnedObject[0].id) {
+                    fileId = parsed.ReturnedObject[0].id;
+                } else if (Array.isArray(parsed) && parsed[0] && parsed[0].id) {
+                    fileId = parsed[0].id;
+                } else if (parsed.data && parsed.data[0] && parsed.data[0].id) {
+                    fileId = parsed.data[0].id;
+                } else if (parsed.id) {
+                    fileId = parsed.id;
                 }
             }
         } catch (parseErr) {
             logger.error("DVP-MailReceiver: could not parse file service response for %s - %s", filename, parseErr);
         }
 
-        if (!url) {
-            logger.error("DVP-MailReceiver: file service upload for %s succeeded but no url could be extracted - check the logged response above", filename);
+        if (!fileId) {
+            logger.error("DVP-MailReceiver: file service upload for %s succeeded but no file id could be extracted - check the logged response above", filename);
+            return cb(null, undefined);
         }
 
-        return cb(null, url);
+        var downloadUrl = buildDownloadUrl(fileId, filename);
+
+        // Fetch it back straight away, as a sanity check that the file is actually
+        // retrievable with the same Bearer token - regardless of the outcome, the
+        // url itself is still handed back since the ticket/UI side will fetch it later.
+        request.get({
+            url: downloadUrl,
+            headers: {
+                authorization: "Bearer " + config.Services.accessToken
+            },
+            encoding: null
+        }, function (getErr, getResponse, fileBody) {
+            if (getErr) {
+                logger.error("DVP-MailReceiver: could not fetch back %s for verification - %s | url=%s", filename, getErr, downloadUrl);
+            } else if (!getResponse || getResponse.statusCode < 200 || getResponse.statusCode >= 300) {
+                logger.error("DVP-MailReceiver: download check for %s returned status %s | url=%s", filename, getResponse && getResponse.statusCode, downloadUrl);
+            } else {
+                logger.info("DVP-MailReceiver: fetched %s successfully (%d bytes) - url=%s", filename, fileBody ? fileBody.length : 0, downloadUrl);
+            }
+
+            return cb(null, downloadUrl);
+        });
     });
 }
 
+// Builds an accessible download link for a previously uploaded file.
+// GET <host>/DVP/API/<version>/FileService/File/Download/:id/:displayname - requires
+// the same Bearer token as the upload call when actually fetched.
+function buildDownloadUrl(fileId, displayName) {
+    return format(
+        "https://{0}/DVP/API/{1}/FileService/File/Download/{2}/{3}",
+        config.Services.uploadurl,
+        config.Services.uploadurlVersion,
+        fileId,
+        encodeURIComponent(displayName)
+    );
+}
+
 module.exports.uploadAttachment = uploadAttachment;
+module.exports.buildDownloadUrl = buildDownloadUrl;

@@ -2,7 +2,7 @@ var CreateComment = require('./Workers/common').CreateComment;
 //require('./common').CreateComment;
 var CreateCommentByReference = require('./Workers/common').CreateCommentByReference;
 var CreateEngagement = require('./Workers/common').CreateEngagement;
-var CreateTicket = require('./Workers/common').CreateTicket;
+var CreateTicketWithAttachments = require('./Workers/common').CreateTicketWithAttachments;
 
 var logger = require('dvp-common/LogHandler/CommonLogHandler.js').logger;
 var EmailSession = require('dvp-mongomodels/model/MailSession').EmailSession;
@@ -37,6 +37,12 @@ var saveMail = function (EmailObj) {
             ticket_priority = email.ticket_priority;
         }
     }
+
+    // Ticket attachments only need the uploaded file's name/url - the raw Buffer
+    // content stays on the EmailSession record, it must not be re-sent to the ticket service.
+    var ticketAttachments = (data.attachments || [])
+        .filter(function (a) { return a.url; })
+        .map(function (a) { return {name: a.fileName, url: a.url}; });
 
     data.direction = 'inbound';
     var emailsession = EmailSession(data);
@@ -99,7 +105,7 @@ var saveMail = function (EmailObj) {
 
                             } else {
 
-                                CreateTicket("email", data.messageId, result.profile, orgs.id, orgs.tenant, ticket_type, data.subject, data.text, ticket_priority, ticket_tags, function (done) {
+                                CreateTicketWithAttachments("email", data.messageId, result.profile, orgs.id, orgs.tenant, ticket_type, data.subject, data.text, ticket_priority, ticket_tags, ticketAttachments, function (done) {
 
                                     if (done) {
 
@@ -121,7 +127,7 @@ var saveMail = function (EmailObj) {
                         } else {
 
 
-                            CreateTicket("email", data.messageId, result.profile, orgs.id, orgs.tenant, ticket_type, data.subject, data.text, ticket_priority, ticket_tags, function (done) {
+                            CreateTicketWithAttachments("email", data.messageId, result.profile, orgs.id, orgs.tenant, ticket_type, data.subject, data.text, ticket_priority, ticket_tags, ticketAttachments, function (done) {
 
                                 if (done) {
 
