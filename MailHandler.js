@@ -6,9 +6,40 @@ var CreateTicketWithAttachments = require('./Workers/common').CreateTicketWithAt
 
 var logger = require('dvp-common/LogHandler/CommonLogHandler.js').logger;
 var EmailSession = require('dvp-mongomodels/model/MailSession').EmailSession;
+var Attachment = require('dvp-mongomodels/model/Attachment').Attachment;
 var messageFormatter = require('dvp-common/CommonMessageGenerator/ClientMessageJsonFormatter.js');
 var config = require('config');
 var format = require('stringformat');
+var async = require('async');
+
+// The Ticket schema's `attachments` field is [{type: ObjectId, ref: 'Attachment'}] -
+// it needs real Attachment documents, not plain strings. Creates one per uploaded
+// file and calls back with their _ids (skipping any that fail to save).
+function createTicketAttachments(attachments, cb) {
+    var uploaded = (attachments || []).filter(function (a) { return a.fileId; });
+    if (uploaded.length === 0) {
+        return cb([]);
+    }
+
+    async.map(uploaded, function (a, next) {
+        var downloadUrl = format("/DVP/API/{0}/FileService/File/Download/{1}/{2}", config.Services.uploadurlVersion, a.fileId, encodeURIComponent(a.fileName));
+        var attachmentDoc = Attachment({
+            file: a.fileName,
+            url: downloadUrl,
+            type: a.contentType,
+            size: a.length
+        });
+        attachmentDoc.save(function (err, saved) {
+            if (err) {
+                logger.error("DVP-MailReceiver: failed to save Attachment doc for %s - %s", a.fileName, err);
+                return next(null, null);
+            }
+            next(null, saved._id);
+        });
+    }, function (err, results) {
+        cb(results.filter(function (id) { return id; }));
+    });
+}
 
 var saveMail = function (EmailObj) {
 
@@ -40,14 +71,9 @@ var saveMail = function (EmailObj) {
         }
     }
 
-    // Ticket attachments store the file service's download path only - the raw
-    // Buffer content stays on the EmailSession record, it must not be re-sent to
-    // the ticket service.
-    var ticketAttachments = (data.attachments || [])
-        .filter(function (a) { return a.fileId; })
-        .map(function (a) {
-            return format("/DVP/API/{0}/FileService/File/Download/{1}/{2}", config.Services.uploadurlVersion, a.fileId, encodeURIComponent(a.fileName));
-        });
+    // Ticket.attachments is [{type: ObjectId, ref: 'Attachment'}] - real Attachment
+    // documents need to be created first, then their _ids referenced on the ticket.
+    createTicketAttachments(data.attachments, function (ticketAttachments) {
 
     data.direction = 'inbound';
     var emailsession = EmailSession(data);
@@ -164,6 +190,8 @@ var saveMail = function (EmailObj) {
 
             })
         }
+    });
+
     });
 
 };
