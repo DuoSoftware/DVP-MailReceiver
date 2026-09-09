@@ -31,8 +31,8 @@ server.pre(restify.pre.userAgentConnection());
 
 server.use(restify.acceptParser(server.acceptable));
 server.use(restify.queryParser());
-server.use(bodyParser.urlencoded({extended: false}));
-server.use(bodyParser.json());
+server.use(bodyParser.urlencoded({extended: false, limit: '25mb'}));
+server.use(bodyParser.json({limit: '25mb'}));
 
 server.head('/DVP/API/:version/webhook/:webhookId', function (req, res, next) {
     res.end();

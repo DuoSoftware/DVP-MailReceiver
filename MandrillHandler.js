@@ -18,6 +18,26 @@ var saveMail = function (webhookId, mailObj) {
         data.dkim = (data.dkim.valid) ? 'pass' : 'failed';
         data.messageId = uuid.v4();
 
+        // Mandrill sends attachments as a hash keyed by id: {name, type, content, base64}.
+        // The EmailSession schema expects an array of {fileName, contentType, content (Buffer), length}.
+        var rawAttachments = data.attachments;
+        data.attachments = [];
+        if (rawAttachments) {
+            Object.keys(rawAttachments).forEach(function (key) {
+                var att = rawAttachments[key];
+                if (!att || !att.content) {
+                    return;
+                }
+                var buffer = att.base64 ? Buffer.from(att.content, 'base64') : Buffer.from(att.content, 'utf8');
+                data.attachments.push({
+                    fileName: att.name,
+                    contentType: att.type,
+                    content: buffer,
+                    length: buffer.length
+                });
+            });
+        }
+
         try {
 
             MandrillWebhook.findOne({inbound_domain: webhookId}, function (err, webhook) {
