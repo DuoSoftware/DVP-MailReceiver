@@ -38,6 +38,12 @@ var saveMail = function (webhookId, mailObj) {
             });
         }
 
+        if (data.attachments.length > 0) {
+            logger.info("DVP-MailReceiver: %d attachment(s) received - %s", data.attachments.length, data.attachments.map(function (a) {
+                return a.fileName + " (" + a.contentType + ", " + a.length + " bytes)";
+            }).join(", "));
+        }
+
         try {
 
             MandrillWebhook.findOne({inbound_domain: webhookId}, function (err, webhook) {
