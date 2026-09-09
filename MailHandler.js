@@ -178,6 +178,7 @@ var saveMail = function (EmailObj) {
                     }
 
                     var inReplyToId = getHeader(data.headers, 'in-reply-to');
+                    logger.info("DVP-MailReceiver: inReplyToId - %s", inReplyToId);
 
                     if (inReplyToId) {
 
