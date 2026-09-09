@@ -67,14 +67,21 @@ server.post('/DVP/API/:version/webhook/:webhookId', function (req, res, next) {
             mandrillEvents = req.body;
         }
 
-        logger.info("DVP-MailReceiver: parsed mandrill_events - %s", JSON.stringify(mandrillEvents));
-
         var event = mandrillEvents && mandrillEvents[0];
 
         // Mandrill can send many event types (send/open/click/bounce/spam/etc), not just inbound
         // mail - only treat it as mail to process into a ticket if it's really an inbound event
         // that actually carries mail details (a recipient address at minimum).
         var isInboundMail = !!(event && event.event === "inbound" && event.msg && event.msg.email);
+
+        var originalMessageId;
+        if (event && event.msg && event.msg.headers) {
+            var headerKey = Object.keys(event.msg.headers).find(function (key) {
+                return key.toLowerCase() === 'message-id';
+            });
+            originalMessageId = headerKey && event.msg.headers[headerKey];
+        }
+        logger.info("DVP-MailReceiver: original Message-Id - %s", originalMessageId);
 
         if (isInboundMail) {
             logger.info(
