@@ -130,7 +130,7 @@ module.exports = {
       "ardsServiceVersion": "1.0.0.0",
 
 
-      "uploadurl": 'fileservice.facetonelite.com',
+      "uploadurl": 'fileservice.dev.facetone.com',
       "uploadport": '5432',
       "uploadurlVersion": "1.0.0.0"
 
