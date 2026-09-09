@@ -7,6 +7,8 @@ var CreateTicketWithAttachments = require('./Workers/common').CreateTicketWithAt
 var logger = require('dvp-common/LogHandler/CommonLogHandler.js').logger;
 var EmailSession = require('dvp-mongomodels/model/MailSession').EmailSession;
 var messageFormatter = require('dvp-common/CommonMessageGenerator/ClientMessageJsonFormatter.js');
+var config = require('config');
+var format = require('stringformat');
 
 var saveMail = function (EmailObj) {
 
@@ -38,13 +40,14 @@ var saveMail = function (EmailObj) {
         }
     }
 
-    // Ticket attachments only need the uploaded file's name/url - the raw Buffer
-    // content stays on the EmailSession record, it must not be re-sent to the ticket service.
-    // Ticket only needs id/displayname per attachment - the front end reconstructs
-    // the download link itself from those two values.
+    // Ticket attachments store the file service's download path only - the raw
+    // Buffer content stays on the EmailSession record, it must not be re-sent to
+    // the ticket service.
     var ticketAttachments = (data.attachments || [])
         .filter(function (a) { return a.fileId; })
-        .map(function (a) { return {id: a.fileId, displayname: a.fileName}; });
+        .map(function (a) {
+            return format("/DVP/API/{0}/FileService/File/Download/{1}/{2}", config.Services.uploadurlVersion, a.fileId, encodeURIComponent(a.fileName));
+        });
 
     data.direction = 'inbound';
     var emailsession = EmailSession(data);

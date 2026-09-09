@@ -646,7 +646,7 @@ function CreateTicketWithAttachments(channel,session,profile, company, tenant, t
             "engagement_session": session,
             "channel": channel,
             "tags": tags,
-            slot_attachment: attachments
+            attachments: attachments
         };
 
 
