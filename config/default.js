@@ -81,7 +81,7 @@ module.exports = {
    "ip": "smtp.mandrillapp.com",
    "port": "587",
    "user": "nipun",
-   "password": "md--I7FttU2RDoK-jWXRsALyQ"
+   "password": "md-ZiDZw9vBxFJLNsUt32jdTg"
    },
 
   "RabbitMQ":
