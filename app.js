@@ -10,6 +10,8 @@ if (config.Host.smtplistner)
 var mailHandler = require('./MailHandler');
 var mongomodels = require('dvp-mongomodels');
 var bodyParser = require('body-parser');
+var messageFormatter = require('dvp-common/CommonMessageGenerator/ClientMessageJsonFormatter.js');
+var ReplyMailer = require('./Workers/ReplyMailer');
 
 mongomodels.connection.once('open', function () {
     logger.info("DVP-MailReceiver: Connected to MongoDB (%s:%s/%s)", config.Mongo.ip, config.Mongo.port, config.Mongo.dbname);
@@ -82,6 +84,9 @@ server.post('/DVP/API/:version/webhook/:webhookId', function (req, res, next) {
             originalMessageId = headerKey && event.msg.headers[headerKey];
         }
         logger.info("DVP-MailReceiver: original Message-Id - %s", originalMessageId);
+        // Temporary - to confirm what Mandrill actually sends in msg.headers for a reply
+        // (specifically In-Reply-To/References), so ticket threading can key off the right field.
+        logger.info("DVP-MailReceiver: msg.headers - %s", event && event.msg && JSON.stringify(event.msg.headers));
 
         if (isInboundMail) {
             logger.info(
@@ -105,6 +110,43 @@ server.post('/DVP/API/:version/webhook/:webhookId', function (req, res, next) {
         logger.error("DVP-MailReceiver: failed to process webhook - %s", e);
         res.end();
     }
+
+    return next();
+});
+
+// Lets the agent console send a reply on an existing mail thread - the console
+// supplies who it's from/to and the original Message-Id so the reply threads
+// under the sender's original email in their mail client.
+server.post('/DVP/API/:version/Email/Reply', function (req, res, next) {
+    var body = req.body || {};
+
+    if (!body.from || !body.to) {
+        var validationError = messageFormatter.FormatMessage(null, "from and to are required", false, undefined);
+        logger.error(validationError);
+        res.end(validationError);
+        return next();
+    }
+
+    if (!body.messageId) {
+        logger.info("DVP-MailReceiver: reply requested without a messageId - %s will be sent unthreaded", body.to);
+    }
+
+    ReplyMailer.sendReply({
+        from: body.from,
+        to: body.to,
+        subject: body.subject,
+        text: body.text,
+        html: body.html,
+        originalMessageId: body.messageId
+    }, function (err, info) {
+        if (err) {
+            var errorResult = messageFormatter.FormatMessage(err, "Failed to send reply email", false, undefined);
+            res.end(errorResult);
+        } else {
+            var successResult = messageFormatter.FormatMessage(null, "Reply email sent", true, undefined);
+            res.end(successResult);
+        }
+    });
 
     return next();
 });

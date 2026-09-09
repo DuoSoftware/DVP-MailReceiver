@@ -19,10 +19,10 @@ function getTransporter() {
     return transporter;
 }
 
-// Sends a same-thread acknowledgement reply back to the original sender.
+// Sends a reply back to the original sender on the same mail thread.
 // In-Reply-To/References (set to the original Message-Id) are what make mail
 // clients thread the reply under the sender's original email.
-function sendAutoReply(options, cb) {
+function sendReply(options, cb) {
     var subject = options.subject || '';
     if (!/^re:/i.test(subject)) {
         subject = 'Re: ' + subject;
@@ -32,8 +32,12 @@ function sendAutoReply(options, cb) {
         from: options.from,
         to: options.to,
         subject: subject,
-        text: 'Thank you for contacting us. We have received your email and will get back to you shortly.'
+        text: options.text || 'Thank you for contacting us. We have received your email and will get back to you shortly.'
     };
+
+    if (options.html) {
+        mailOptions.html = options.html;
+    }
 
     if (options.originalMessageId) {
         mailOptions.inReplyTo = options.originalMessageId;
@@ -42,9 +46,9 @@ function sendAutoReply(options, cb) {
 
     getTransporter().sendMail(mailOptions, function (err, info) {
         if (err) {
-            logger.error("DVP-MailReceiver: failed to send auto-reply to %s - %s", options.to, err);
+            logger.error("DVP-MailReceiver: failed to send reply to %s - %s", options.to, err);
         } else {
-            logger.info("DVP-MailReceiver: auto-reply sent to %s - %s", options.to, info && info.response);
+            logger.info("DVP-MailReceiver: reply sent to %s - %s", options.to, info && info.response);
         }
         if (cb) {
             cb(err, info);
@@ -52,4 +56,7 @@ function sendAutoReply(options, cb) {
     });
 }
 
-module.exports.sendAutoReply = sendAutoReply;
+module.exports.sendReply = sendReply;
+// Kept as an alias - MandrillHandler's inbound auto-acknowledgement was written
+// against this name and doesn't pass text/html, so it still gets the canned message.
+module.exports.sendAutoReply = sendReply;
