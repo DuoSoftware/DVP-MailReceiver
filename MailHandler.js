@@ -7,11 +7,14 @@ var CreateTicketWithAttachments = require('./Workers/common').CreateTicketWithAt
 var logger = require('dvp-common/LogHandler/CommonLogHandler.js').logger;
 var EmailSession = require('dvp-mongomodels/model/MailSession').EmailSession;
 var Attachment = require('dvp-mongomodels/model/Attachment').Attachment;
+var Ticket = require('dvp-mongomodels/model/Ticket').Ticket;
 var messageFormatter = require('dvp-common/CommonMessageGenerator/ClientMessageJsonFormatter.js');
 var config = require('config');
 var format = require('stringformat');
 var async = require('async');
-var getOriginalMessageId = require('./Workers/MessageIdHelper').getOriginalMessageId;
+var MessageIdHelper = require('./Workers/MessageIdHelper');
+var getOriginalMessageId = MessageIdHelper.getOriginalMessageId;
+var getHeader = MessageIdHelper.getHeader;
 
 // The Ticket schema's `attachments` field is [{type: ObjectId, ref: 'Attachment'}] -
 // it needs real Attachment documents, not plain strings. Creates one per uploaded
@@ -102,23 +105,11 @@ var saveMail = function (EmailObj) {
                     /////////////////////////////////////////////create ticket directly//////////////////////////
                     //CreateTicket("sms",sessionid,sessiondata["CompanyId"],sessiondata["TenantId"],smsData["type"], smsData["subject"], smsData["description"],smsData["priority"],smsData["tags"],function(success, result){});
 
-                    if (data.inReplyTo && data.inReplyTo.length > 0) {
-
-                        
-
-                        try {
-                            CreateComment('email', 'text', data.company, data.tenant, data.inReplyTo[0], result, function (done) {
-                                if (done) {
-                                    logger.debug("comment created successfully");
-
-                                } else {
-                                    logger.error("comment creation failed");
-                                }
-                            });
-                        } catch (ex) {
-                            logger.error("Error in comment ", ex);
-                        }
-                    } else {
+                    // Falls back to the subject-parsing heuristic / new-ticket creation below -
+                    // used both when there's no In-Reply-To header at all, and when there is
+                    // one but it doesn't match any ticket we know about (e.g. a reply to an
+                    // email this system didn't send).
+                    var handleAsNewTicketOrSubjectComment = function () {
 
                         if (data.subject) {
 
@@ -184,6 +175,48 @@ var saveMail = function (EmailObj) {
                             });
 
                         }
+                    }
+
+                    var inReplyToId = getHeader(data.headers, 'in-reply-to');
+
+                    if (inReplyToId) {
+
+                        Ticket.findOne({
+                            company: orgs.id,
+                            tenant: orgs.tenant,
+                            custom_fields: {$elemMatch: {field: 'message_id', value: inReplyToId}}
+                        }, function (err, foundTicket) {
+
+                            if (err) {
+                                logger.error("DVP-MailReceiver: ticket lookup by In-Reply-To %s failed - %s", inReplyToId, err);
+                                handleAsNewTicketOrSubjectComment();
+
+                            } else if (foundTicket && foundTicket.engagement_session) {
+
+                                logger.debug("DVP-MailReceiver: In-Reply-To %s matched ticket %s - adding as a comment", inReplyToId, foundTicket.reference);
+
+                                try {
+                                    CreateComment('email', 'text', data.company, data.tenant, foundTicket.engagement_session, result, function (done) {
+                                        if (done) {
+                                            logger.debug("comment created successfully");
+
+                                        } else {
+                                            logger.error("comment creation failed");
+                                        }
+                                    });
+                                } catch (ex) {
+                                    logger.error("Error in comment ", ex);
+                                }
+
+                            } else {
+
+                                logger.debug("DVP-MailReceiver: no ticket found for In-Reply-To %s - creating a new ticket instead", inReplyToId);
+                                handleAsNewTicketOrSubjectComment();
+                            }
+                        });
+
+                    } else {
+                        handleAsNewTicketOrSubjectComment();
                     }
 
                     //////////////////////////////////////first check in comments and update them////////////////////////////////////////////////////////////////
