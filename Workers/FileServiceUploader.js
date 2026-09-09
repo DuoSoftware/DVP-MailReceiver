@@ -1,17 +1,24 @@
 var request = require('request');
 var config = require('config');
 var format = require('stringformat');
+var validator = require('validator');
 var logger = require('dvp-common/LogHandler/CommonLogHandler.js').logger;
 
 // Uploads a single decoded attachment buffer to the platform file service and
 // returns (via cb(err, url)) the accessible URL for that file.
 function uploadAttachment(buffer, filename, contentType, cb) {
 
-    if (!(config.Services && config.Services.uploadurl && config.Services.uploadport && config.Services.uploadurlVersion)) {
-        return cb(new Error('File service is not configured (config.Services.uploadurl/uploadport/uploadurlVersion)'));
+    if (!(config.Services && config.Services.uploadurl && config.Services.uploadurlVersion)) {
+        return cb(new Error('File service is not configured (config.Services.uploadurl/uploadurlVersion)'));
     }
 
-    var uploadURL = format("http://{0}:{1}/DVP/API/{2}/FileService/File/Upload", config.Services.uploadurl, config.Services.uploadport, config.Services.uploadurlVersion);
+    // Matches the convention used throughout Workers/common.js: only append the port
+    // when the host is a raw IP - a real hostname is assumed to be behind a proxy on
+    // the standard port already.
+    var uploadURL = format("http://{0}/DVP/API/{1}/FileService/File/Upload", config.Services.uploadurl, config.Services.uploadurlVersion);
+    if (validator.isIP(config.Services.uploadurl) && config.Services.uploadport) {
+        uploadURL = format("http://{0}:{1}/DVP/API/{2}/FileService/File/Upload", config.Services.uploadurl, config.Services.uploadport, config.Services.uploadurlVersion);
+    }
 
     request.post({
         url: uploadURL,
