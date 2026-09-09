@@ -67,6 +67,8 @@ server.post('/DVP/API/:version/webhook/:webhookId', function (req, res, next) {
             mandrillEvents = req.body;
         }
 
+        logger.info("DVP-MailReceiver: parsed mandrill_events - %s", JSON.stringify(mandrillEvents));
+
         var event = mandrillEvents && mandrillEvents[0];
 
         // Mandrill can send many event types (send/open/click/bounce/spam/etc), not just inbound
