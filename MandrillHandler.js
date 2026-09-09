@@ -6,6 +6,20 @@ var messageFormatter = require('dvp-common/CommonMessageGenerator/ClientMessageJ
 var uuid = require('node-uuid');
 var async = require('async');
 var FileServiceUploader = require('./Workers/FileServiceUploader');
+var ReplyMailer = require('./Workers/ReplyMailer');
+
+// Mandrill sends the original email's raw headers (Subject, Message-Id, etc.) as
+// a plain object keyed however the sending client capitalized them - look the
+// Message-Id up case-insensitively rather than assuming exact casing.
+function getOriginalMessageId(headers) {
+    if (!headers) {
+        return undefined;
+    }
+    var key = Object.keys(headers).find(function (k) {
+        return k.toLowerCase() === 'message-id';
+    });
+    return key && headers[key];
+}
 
 // Uploads every decoded attachment to the file service and stamps `fileId`
 // onto each one (the file service's own id, used for the ticket's slot_attachment).
@@ -34,6 +48,7 @@ var saveMail = function (webhookId, mailObj) {
     return new Promise(function (resolve, reject) {
 
         var data = mailObj.msg;
+        var originalMessageId = getOriginalMessageId(data.headers);
         data.from = [];
         data.from[0] = {address: data.from_email, name: data.from_name};
         data.to = [];
@@ -135,6 +150,14 @@ var saveMail = function (webhookId, mailObj) {
                                         "data": data
                                     };
                                     MailHandler.saveMail(MailObj);
+
+                                    ReplyMailer.sendAutoReply({
+                                        from: data.email,
+                                        to: data.from_email,
+                                        subject: data.subject,
+                                        originalMessageId: originalMessageId
+                                    });
+
                                     var jsonString = messageFormatter.FormatMessage(null, "Email successfully handled", true, undefined);
                                     logger.info(jsonString);
                                     resolve(jsonString);

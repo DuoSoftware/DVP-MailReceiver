@@ -78,10 +78,10 @@ module.exports = {
 
 
    "SMTP":{
-   "ip": "8e5gpvyrrkde.uemp.mail-manager-smtp.amazonaws.com",
+   "ip": "smtp.mandrillapp.com",
    "port": "587",
-   "user": "inp-zasdmjo5xy7537tuaakgznqh",
-   "password": "Duo$Smtp#26"
+   "user": "nipun@mandrill.dialdesk.com",
+   "password": "md--I7FttU2RDoK-jWXRsALyQ"
    },
 
   "RabbitMQ":
