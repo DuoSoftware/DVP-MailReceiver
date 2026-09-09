@@ -5,8 +5,10 @@ var validator = require('validator');
 var logger = require('dvp-common/LogHandler/CommonLogHandler.js').logger;
 
 // Uploads a single decoded attachment buffer to the platform file service and
-// returns (via cb(err, url)) the accessible URL for that file.
-function uploadAttachment(buffer, filename, contentType, cb) {
+// returns (via cb(err, url)) the accessible URL for that file. tenant/company
+// identify which org the file belongs to - same companyinfo convention used by
+// CreateComment/CreateTicket in Workers/common.js.
+function uploadAttachment(buffer, filename, contentType, tenant, company, cb) {
 
     if (!(config.Services && config.Services.uploadurl && config.Services.uploadurlVersion)) {
         return cb(new Error('File service is not configured (config.Services.uploadurl/uploadurlVersion)'));
@@ -23,7 +25,8 @@ function uploadAttachment(buffer, filename, contentType, cb) {
     request.post({
         url: uploadURL,
         headers: {
-            authorization: "Bearer " + config.Services.accessToken
+            authorization: "Bearer " + config.Services.accessToken,
+            companyinfo: format("{0}:{1}", tenant, company)
         },
         formData: {
             files: {
