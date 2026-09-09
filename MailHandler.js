@@ -196,6 +196,18 @@ var saveMail = function (EmailObj) {
 
                                 logger.debug("DVP-MailReceiver: In-Reply-To %s matched ticket %s - adding as a comment", inReplyToId, foundTicket.reference);
 
+                                if (originalMessageId) {
+                                    Ticket.findOneAndUpdate(
+                                        {_id: foundTicket._id},
+                                        {$push: {custom_fields: {field: 'reply_message_id', value: originalMessageId}}},
+                                        function (pushErr) {
+                                            if (pushErr) {
+                                                logger.error("DVP-MailReceiver: failed to record reply_message_id on ticket %s - %s", foundTicket.reference, pushErr);
+                                            }
+                                        }
+                                    );
+                                }
+
                                 try {
                                     CreateComment('email', 'text', data.company, data.tenant, foundTicket.engagement_session, result, function (done) {
                                         if (done) {
