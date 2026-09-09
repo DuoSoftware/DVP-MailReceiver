@@ -131,7 +131,7 @@ module.exports = {
 
 
       "uploadurl": 'fileservice.facetonelite.com',
-      "uploadport": '8888',
+      "uploadport": '5432',
       "uploadurlVersion": "1.0.0.0"
 
 
