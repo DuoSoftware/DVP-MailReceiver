@@ -80,7 +80,7 @@ module.exports = {
    "SMTP":{
    "ip": "smtp.mandrillapp.com",
    "port": "587",
-   "user": "nipun",
+   "user": "Facetone",
    "password": "md-ZiDZw9vBxFJLNsUt32jdTg"
    },
 
