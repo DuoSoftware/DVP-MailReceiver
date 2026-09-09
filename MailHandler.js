@@ -40,9 +40,11 @@ var saveMail = function (EmailObj) {
 
     // Ticket attachments only need the uploaded file's name/url - the raw Buffer
     // content stays on the EmailSession record, it must not be re-sent to the ticket service.
+    // Ticket only needs id/displayname per attachment - the front end reconstructs
+    // the download link itself from those two values.
     var ticketAttachments = (data.attachments || [])
-        .filter(function (a) { return a.url; })
-        .map(function (a) { return {name: a.fileName, url: a.url}; });
+        .filter(function (a) { return a.fileId; })
+        .map(function (a) { return {id: a.fileId, displayname: a.fileName}; });
 
     data.direction = 'inbound';
     var emailsession = EmailSession(data);

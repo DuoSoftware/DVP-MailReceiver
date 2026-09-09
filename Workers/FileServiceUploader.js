@@ -5,9 +5,10 @@ var validator = require('validator');
 var logger = require('dvp-common/LogHandler/CommonLogHandler.js').logger;
 
 // Uploads a single decoded attachment buffer to the platform file service and
-// returns (via cb(err, url)) the accessible URL for that file. tenant/company
-// identify which org the file belongs to - same companyinfo convention used by
-// CreateComment/CreateTicket in Workers/common.js.
+// returns (via cb(err, {id, displayname})) the file's id and display name - the
+// front end reconstructs the download link itself from those two values.
+// tenant/company identify which org the file belongs to - same companyinfo
+// convention used by CreateComment/CreateTicket in Workers/common.js.
 function uploadAttachment(buffer, filename, contentType, tenant, company, cb) {
 
     if (!(config.Services && config.Services.uploadurl && config.Services.uploadurlVersion)) {
@@ -54,9 +55,11 @@ function uploadAttachment(buffer, filename, contentType, tenant, company, cb) {
         var fileId;
         try {
             var parsed = (typeof body === 'string') ? JSON.parse(body) : body;
-            // Best-effort extraction across a few common response shapes - once the
-            // real response is seen in the log above, trim this to the exact one.
-            if (parsed) {
+            // Real shape (confirmed): {Exception, CustomMessage, IsSuccess, Result: "<file id>"}
+            if (parsed && parsed.IsSuccess && parsed.Result) {
+                fileId = parsed.Result;
+            } else if (parsed) {
+                // Fallback guesses, kept in case another environment returns a different shape.
                 if (parsed.ReturnedObject && parsed.ReturnedObject[0] && parsed.ReturnedObject[0].id) {
                     fileId = parsed.ReturnedObject[0].id;
                 } else if (Array.isArray(parsed) && parsed[0] && parsed[0].id) {
@@ -77,10 +80,11 @@ function uploadAttachment(buffer, filename, contentType, tenant, company, cb) {
         }
 
         var downloadUrl = buildDownloadUrl(fileId, filename);
+        logger.info("DVP-MailReceiver: attachment %s uploaded - id=%s url=%s", filename, fileId, downloadUrl);
 
         // Fetch it back straight away, as a sanity check that the file is actually
-        // retrievable with the same Bearer token - regardless of the outcome, the
-        // url itself is still handed back since the ticket/UI side will fetch it later.
+        // retrievable with the same Bearer token - purely a log/verification step,
+        // it doesn't affect what gets handed back to the caller.
         request.get({
             url: downloadUrl,
             headers: {
@@ -96,7 +100,7 @@ function uploadAttachment(buffer, filename, contentType, tenant, company, cb) {
                 logger.info("DVP-MailReceiver: fetched %s successfully (%d bytes) - url=%s", filename, fileBody ? fileBody.length : 0, downloadUrl);
             }
 
-            return cb(null, downloadUrl);
+            return cb(null, {id: fileId, displayname: filename});
         });
     });
 }

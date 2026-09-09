@@ -7,21 +7,21 @@ var uuid = require('node-uuid');
 var async = require('async');
 var FileServiceUploader = require('./Workers/FileServiceUploader');
 
-// Uploads every decoded attachment to the file service and stamps a `url` field
-// onto each one. Always calls back with the (possibly partially-uploaded) array -
-// a single failed upload doesn't block the rest of the email from being processed.
+// Uploads every decoded attachment to the file service and stamps `fileId`
+// onto each one (the file service's own id, used for the ticket's slot_attachment).
+// Always calls back with the (possibly partially-uploaded) array - a single
+// failed upload doesn't block the rest of the email from being processed.
 function uploadAttachments(attachments, orgs, cb) {
     if (!attachments || attachments.length === 0) {
         return cb(attachments);
     }
 
     async.map(attachments, function (att, next) {
-        FileServiceUploader.uploadAttachment(att.content, att.fileName, att.contentType, orgs.tenant, orgs.id, function (err, url) {
+        FileServiceUploader.uploadAttachment(att.content, att.fileName, att.contentType, orgs.tenant, orgs.id, function (err, uploaded) {
             if (err) {
                 logger.error("DVP-MailReceiver: failed to upload attachment %s to file service - %s", att.fileName, err);
-            } else if (url) {
-                att.url = url;
-                logger.info("DVP-MailReceiver: attachment %s uploaded - %s", att.fileName, url);
+            } else if (uploaded && uploaded.id) {
+                att.fileId = uploaded.id;
             }
             next(null, att);
         });
@@ -105,13 +105,13 @@ var saveMail = function (webhookId, mailObj) {
                         data.tenant = orgs.tenant;
 
                         // Upload attachments now that we know which company/tenant they belong to.
-                        uploadAttachments(data.attachments, orgs, function (attachmentsWithUrls) {
-                            data.attachments = attachmentsWithUrls;
+                        uploadAttachments(data.attachments, orgs, function (attachmentsWithIds) {
+                            data.attachments = attachmentsWithIds;
 
-                            var uploaded = attachmentsWithUrls.filter(function (a) { return a.url; });
+                            var uploaded = attachmentsWithIds.filter(function (a) { return a.fileId; });
                             if (uploaded.length > 0) {
-                                logger.info("DVP-MailReceiver: attached file URL(s) - %s", uploaded.map(function (a) {
-                                    return a.fileName + ": " + a.url;
+                                logger.info("DVP-MailReceiver: uploaded file id(s) - %s", uploaded.map(function (a) {
+                                    return a.fileName + ": " + a.fileId;
                                 }).join(", "));
                             }
 
