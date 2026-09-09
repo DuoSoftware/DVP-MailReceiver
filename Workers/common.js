@@ -625,7 +625,7 @@ function CreateTicket(channel,session,profile, company, tenant, type, subjecct, 
     }
 }
 
-function CreateTicketWithAttachments(channel,session,profile, company, tenant, type, subjecct, description, priority, tags, attachments, cb){
+function CreateTicketWithAttachments(channel,session,profile, company, tenant, type, subjecct, description, priority, tags, attachments, custom_fields, cb){
 
     if((config.Services && config.Services.ticketServiceHost && config.Services.ticketServicePort && config.Services.ticketServiceVersion)) {
 
@@ -646,6 +646,7 @@ function CreateTicketWithAttachments(channel,session,profile, company, tenant, t
             "engagement_session": session,
             "channel": channel,
             "tags": tags,
+            "custom_fields": custom_fields || [],
             attachments: attachments
         };
 

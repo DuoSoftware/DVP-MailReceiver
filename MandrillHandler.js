@@ -7,19 +7,7 @@ var uuid = require('node-uuid');
 var async = require('async');
 var FileServiceUploader = require('./Workers/FileServiceUploader');
 var ReplyMailer = require('./Workers/ReplyMailer');
-
-// Mandrill sends the original email's raw headers (Subject, Message-Id, etc.) as
-// a plain object keyed however the sending client capitalized them - look the
-// Message-Id up case-insensitively rather than assuming exact casing.
-function getOriginalMessageId(headers) {
-    if (!headers) {
-        return undefined;
-    }
-    var key = Object.keys(headers).find(function (k) {
-        return k.toLowerCase() === 'message-id';
-    });
-    return key && headers[key];
-}
+var getOriginalMessageId = require('./Workers/MessageIdHelper').getOriginalMessageId;
 
 // Uploads every decoded attachment to the file service and stamps `fileId`
 // onto each one (the file service's own id, used for the ticket's slot_attachment).

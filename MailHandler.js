@@ -11,6 +11,7 @@ var messageFormatter = require('dvp-common/CommonMessageGenerator/ClientMessageJ
 var config = require('config');
 var format = require('stringformat');
 var async = require('async');
+var getOriginalMessageId = require('./Workers/MessageIdHelper').getOriginalMessageId;
 
 // The Ticket schema's `attachments` field is [{type: ObjectId, ref: 'Attachment'}] -
 // it needs real Attachment documents, not plain strings. Creates one per uploaded
@@ -54,6 +55,12 @@ var saveMail = function (EmailObj) {
     var ticket_type = 'question';
     var ticket_tags = [];
     var ticket_priority = 'low';
+
+    var ticket_custom_fields = [];
+    var originalMessageId = getOriginalMessageId(data.headers);
+    if (originalMessageId) {
+        ticket_custom_fields.push({field: 'message_id', value: originalMessageId});
+    }
 
 
     if (email) {
@@ -136,7 +143,7 @@ var saveMail = function (EmailObj) {
 
                             } else {
 
-                                CreateTicketWithAttachments("email", data.messageId, result.profile, orgs.id, orgs.tenant, ticket_type, data.subject, data.text, ticket_priority, ticket_tags, ticketAttachments, function (done) {
+                                CreateTicketWithAttachments("email", data.messageId, result.profile, orgs.id, orgs.tenant, ticket_type, data.subject, data.text, ticket_priority, ticket_tags, ticketAttachments, ticket_custom_fields, function (done) {
 
                                     if (done) {
 
@@ -158,7 +165,7 @@ var saveMail = function (EmailObj) {
                         } else {
 
 
-                            CreateTicketWithAttachments("email", data.messageId, result.profile, orgs.id, orgs.tenant, ticket_type, data.subject, data.text, ticket_priority, ticket_tags, ticketAttachments, function (done) {
+                            CreateTicketWithAttachments("email", data.messageId, result.profile, orgs.id, orgs.tenant, ticket_type, data.subject, data.text, ticket_priority, ticket_tags, ticketAttachments, ticket_custom_fields, function (done) {
 
                                 if (done) {
 
