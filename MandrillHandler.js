@@ -4,6 +4,31 @@ var Email = require('dvp-mongomodels/model/Email').Email;
 var logger = require('dvp-common/LogHandler/CommonLogHandler.js').logger;
 var messageFormatter = require('dvp-common/CommonMessageGenerator/ClientMessageJsonFormatter.js');
 var uuid = require('node-uuid');
+var async = require('async');
+var FileServiceUploader = require('./Workers/FileServiceUploader');
+
+// Uploads every decoded attachment to the file service and stamps a `url` field
+// onto each one. Always calls back with the (possibly partially-uploaded) array -
+// a single failed upload doesn't block the rest of the email from being processed.
+function uploadAttachments(attachments, cb) {
+    if (!attachments || attachments.length === 0) {
+        return cb(attachments);
+    }
+
+    async.map(attachments, function (att, next) {
+        FileServiceUploader.uploadAttachment(att.content, att.fileName, att.contentType, function (err, url) {
+            if (err) {
+                logger.error("DVP-MailReceiver: failed to upload attachment %s to file service - %s", att.fileName, err);
+            } else if (url) {
+                att.url = url;
+                logger.info("DVP-MailReceiver: attachment %s uploaded - %s", att.fileName, url);
+            }
+            next(null, att);
+        });
+    }, function (err, results) {
+        cb(results);
+    });
+}
 
 var saveMail = function (webhookId, mailObj) {
     return new Promise(function (resolve, reject) {
@@ -44,82 +69,93 @@ var saveMail = function (webhookId, mailObj) {
             }).join(", "));
         }
 
-        try {
+        uploadAttachments(data.attachments, function (attachmentsWithUrls) {
+            data.attachments = attachmentsWithUrls;
 
-            MandrillWebhook.findOne({inbound_domain: webhookId}, function (err, webhook) {
-                if (err) {
-                    var jsonString = messageFormatter.FormatMessage(err, "Get Mandrill webhook Failed", false, undefined);
-                    logger.error(jsonString);
-                    reject(jsonString)
+            var uploaded = attachmentsWithUrls.filter(function (a) { return a.url; });
+            if (uploaded.length > 0) {
+                logger.info("DVP-MailReceiver: attached file URL(s) - %s", uploaded.map(function (a) {
+                    return a.fileName + ": " + a.url;
+                }).join(", "));
+            }
 
-                } else if (!webhook) {
-                    var jsonString = messageFormatter.FormatMessage(null, "No webhook registered for domain " + webhookId, false, undefined);
-                    logger.error(jsonString);
-                    reject(jsonString);
+            try {
 
-                } else {
-                    var receiver = data.email;
-                    var orgs = {
-                        id: webhook.company,
-                        tenant: webhook.tenant
-                    };
-                    var arr = receiver.split("@"); //
+                MandrillWebhook.findOne({inbound_domain: webhookId}, function (err, webhook) {
+                    if (err) {
+                        var jsonString = messageFormatter.FormatMessage(err, "Get Mandrill webhook Failed", false, undefined);
+                        logger.error(jsonString);
+                        reject(jsonString)
 
-                    logger.debug("Receiver - " + receiver);
-                    if (arr.length > 1) { //
-
-                        var domain = webhook.inbound_domain;
-
-                        var accountname = arr[0];
-
-                        logger.debug("Domain - " + domain);
-                        logger.debug("Company - " + webhook.company);
-
-                        data.created_at = Date.now();
-                        data.company = orgs.id;
-                        data.tenant = orgs.tenant;
-
-                        Email.findOne({
-                            company: orgs.id,
-                            tenant: orgs.tenant,
-                            name: arr[0],
-                            domain: domain,
-                            active: true
-                        }, function (err, email) {
-                            if (err) {
-
-                                var jsonString = messageFormatter.FormatMessage(err, "Get Email config Failed", false, undefined);
-                                logger.error(jsonString);
-                                reject(jsonString);
-
-                            } else {
-                                var MailObj = {
-                                    "orgs": orgs,
-                                    "email": email,
-                                    "data": data
-                                };
-                                MailHandler.saveMail(MailObj);
-                                var jsonString = messageFormatter.FormatMessage(null, "Email successfully handled", true, undefined);
-                                logger.info(jsonString);
-                                resolve(jsonString);
-                            }
-
-
-                        });
-
-
-                    } else {
-                        var jsonString = messageFormatter.FormatMessage(null, "Invalid recipient address " + receiver, false, undefined);
+                    } else if (!webhook) {
+                        var jsonString = messageFormatter.FormatMessage(null, "No webhook registered for domain " + webhookId, false, undefined);
                         logger.error(jsonString);
                         reject(jsonString);
-                    }
 
-                }
-            })
-        } catch (e) {
-            console.log(e);
-            reject(e);
-        }
+                    } else {
+                        var receiver = data.email;
+                        var orgs = {
+                            id: webhook.company,
+                            tenant: webhook.tenant
+                        };
+                        var arr = receiver.split("@"); //
+
+                        logger.debug("Receiver - " + receiver);
+                        if (arr.length > 1) { //
+
+                            var domain = webhook.inbound_domain;
+
+                            var accountname = arr[0];
+
+                            logger.debug("Domain - " + domain);
+                            logger.debug("Company - " + webhook.company);
+
+                            data.created_at = Date.now();
+                            data.company = orgs.id;
+                            data.tenant = orgs.tenant;
+
+                            Email.findOne({
+                                company: orgs.id,
+                                tenant: orgs.tenant,
+                                name: arr[0],
+                                domain: domain,
+                                active: true
+                            }, function (err, email) {
+                                if (err) {
+
+                                    var jsonString = messageFormatter.FormatMessage(err, "Get Email config Failed", false, undefined);
+                                    logger.error(jsonString);
+                                    reject(jsonString);
+
+                                } else {
+                                    var MailObj = {
+                                        "orgs": orgs,
+                                        "email": email,
+                                        "data": data
+                                    };
+                                    MailHandler.saveMail(MailObj);
+                                    var jsonString = messageFormatter.FormatMessage(null, "Email successfully handled", true, undefined);
+                                    logger.info(jsonString);
+                                    resolve(jsonString);
+                                }
+
+
+                            });
+
+
+                        } else {
+                            var jsonString = messageFormatter.FormatMessage(null, "Invalid recipient address " + receiver, false, undefined);
+                            logger.error(jsonString);
+                            reject(jsonString);
+                        }
+
+                    }
+                })
+            } catch (e) {
+                console.log(e);
+                reject(e);
+            }
+        });
 
     })
 };
