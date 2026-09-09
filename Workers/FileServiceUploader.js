@@ -54,11 +54,9 @@ function uploadAttachment(buffer, filename, contentType, tenant, company, cb) {
         var fileId;
         try {
             var parsed = (typeof body === 'string') ? JSON.parse(body) : body;
-            // Real shape (confirmed): {Exception, CustomMessage, IsSuccess, Result: "<file id>"}
-            if (parsed && parsed.IsSuccess && parsed.Result) {
-                fileId = parsed.Result;
-            } else if (parsed) {
-                // Fallback guesses, kept in case another environment returns a different shape.
+            // Best-effort extraction across a few common response shapes - once the
+            // real response is seen in the log above, trim this to the exact one.
+            if (parsed) {
                 if (parsed.ReturnedObject && parsed.ReturnedObject[0] && parsed.ReturnedObject[0].id) {
                     fileId = parsed.ReturnedObject[0].id;
                 } else if (Array.isArray(parsed) && parsed[0] && parsed[0].id) {
