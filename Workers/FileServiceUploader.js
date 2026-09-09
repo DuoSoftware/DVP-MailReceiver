@@ -79,29 +79,9 @@ function uploadAttachment(buffer, filename, contentType, tenant, company, cb) {
             return cb(null, undefined);
         }
 
-        var downloadUrl = buildDownloadUrl(fileId, filename);
-        logger.info("DVP-MailReceiver: attachment %s uploaded - id=%s url=%s", filename, fileId, downloadUrl);
+        logger.info("DVP-MailReceiver: attachment uploaded - id=%s displayname=%s", fileId, filename);
 
-        // Fetch it back straight away, as a sanity check that the file is actually
-        // retrievable with the same Bearer token - purely a log/verification step,
-        // it doesn't affect what gets handed back to the caller.
-        request.get({
-            url: downloadUrl,
-            headers: {
-                authorization: "Bearer " + config.Services.accessToken
-            },
-            encoding: null
-        }, function (getErr, getResponse, fileBody) {
-            if (getErr) {
-                logger.error("DVP-MailReceiver: could not fetch back %s for verification - %s | url=%s", filename, getErr, downloadUrl);
-            } else if (!getResponse || getResponse.statusCode < 200 || getResponse.statusCode >= 300) {
-                logger.error("DVP-MailReceiver: download check for %s returned status %s | url=%s", filename, getResponse && getResponse.statusCode, downloadUrl);
-            } else {
-                logger.info("DVP-MailReceiver: fetched %s successfully (%d bytes) - url=%s", filename, fileBody ? fileBody.length : 0, downloadUrl);
-            }
-
-            return cb(null, {id: fileId, displayname: filename});
-        });
+        return cb(null, {id: fileId, displayname: filename});
     });
 }
 
