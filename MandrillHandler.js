@@ -6,8 +6,6 @@ var messageFormatter = require('dvp-common/CommonMessageGenerator/ClientMessageJ
 var uuid = require('node-uuid');
 var async = require('async');
 var FileServiceUploader = require('./Workers/FileServiceUploader');
-var ReplyMailer = require('./Workers/ReplyMailer');
-var getOriginalMessageId = require('./Workers/MessageIdHelper').getOriginalMessageId;
 
 // Uploads every decoded attachment to the file service and stamps `fileId`
 // onto each one (the file service's own id, used for the ticket's slot_attachment).
@@ -36,7 +34,6 @@ var saveMail = function (webhookId, mailObj) {
     return new Promise(function (resolve, reject) {
 
         var data = mailObj.msg;
-        var originalMessageId = getOriginalMessageId(data.headers);
         data.from = [];
         data.from[0] = {address: data.from_email, name: data.from_name};
         data.to = [];
@@ -139,12 +136,8 @@ var saveMail = function (webhookId, mailObj) {
                                     };
                                     MailHandler.saveMail(MailObj);
 
-                                    ReplyMailer.sendAutoReply({
-                                        from: data.email,
-                                        to: data.from_email,
-                                        subject: data.subject,
-                                        originalMessageId: originalMessageId
-                                    });
+                                    // Auto-reply-on-inbound is disabled - replies are now only sent
+                                    // on demand via POST /DVP/API/:version/Email/Reply (see app.js).
 
                                     var jsonString = messageFormatter.FormatMessage(null, "Email successfully handled", true, undefined);
                                     logger.info(jsonString);

@@ -185,7 +185,7 @@ var saveMail = function (EmailObj) {
                         Ticket.findOne({
                             company: orgs.id,
                             tenant: orgs.tenant,
-                            custom_fields: {$elemMatch: {field: 'message_id', value: inReplyToId}}
+                            custom_fields: {$elemMatch: {field: {$in: ['message_id', 'reply_message_id']}, value: inReplyToId}}
                         }, function (err, foundTicket) {
 
                             if (err) {
