@@ -65,6 +65,14 @@ var saveMail = function (EmailObj) {
         ticket_custom_fields.push({field: 'message_id', value: originalMessageId});
     }
 
+    if (data.from && data.from[0] && data.from[0].address) {
+        ticket_custom_fields.push({field: 'from_mail', value: data.from[0].address});
+    }
+
+    if (data.to && data.to[0] && data.to[0].address) {
+        ticket_custom_fields.push({field: 'to_mail', value: data.to[0].address});
+    }
+
 
     if (email) {
 
