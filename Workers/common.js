@@ -855,8 +855,10 @@ function UploadAttachments(session_id, attachments, tenant, company, callback ){
 
             async.parallel(calls, function (err, result) {
 
-                if (err)
-                    return console.log(err);
+                if (err) {
+                    logger.error("Attachment upload failed", err);
+                    return callback([]);
+                }
                 console.log(result);
 
                 callback(result);

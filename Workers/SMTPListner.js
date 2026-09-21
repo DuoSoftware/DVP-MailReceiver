@@ -5,6 +5,9 @@ var mailin = require('mailin');
 var CreateComment =  require('dvp-common/ServiceAccess/common').CreateComment;
 //require('./common').CreateComment;
 var CreateCommentByReference = require('./common').CreateCommentByReference;
+var CreateCommentWithAttachments = require('./common').CreateCommentWithAttachments;
+var CreateCommentByReferenceWithAttachments = require('./common').CreateCommentByReferenceWithAttachments;
+var UploadAttachments = require('./common').UploadAttachments;
 var CreateEngagement = require('dvp-common/ServiceAccess/common').CreateEngagement;
 var CreateTicket = require('dvp-common/ServiceAccess/common').CreateTicket;
 
@@ -17,6 +20,23 @@ var EmailSession = require('dvp-mongomodels/model/MailSession').EmailSession;
 var Org = require('dvp-mongomodels/model/Organisation');
 var messageFormatter = require('dvp-common/CommonMessageGenerator/ClientMessageJsonFormatter.js');
 var Email = require('dvp-mongomodels/model/Email').Email;
+var Ticket = require('dvp-mongomodels/model/Ticket').Ticket;
+
+
+function AddAttachmentsToTicket(query, attachmentIds) {
+
+    if (!attachmentIds || attachmentIds.length === 0) return;
+
+    Ticket.findOneAndUpdate(query, {$push: {attachments: {$each: attachmentIds}}}, function (err, ticket) {
+        if (err) {
+            logger.error("Failed to add attachments to ticket " + JSON.stringify(query), err);
+        } else if (!ticket) {
+            logger.error("Ticket not found to attach attachments, query: " + JSON.stringify(query));
+        } else {
+            logger.info("Attachments added to ticket " + ticket.reference);
+        }
+    });
+}
 
 
 
@@ -112,17 +132,26 @@ var func = function (connection, data, content) {
                                                 /////////////////////////////////////////////create ticket directly//////////////////////////
                                                 //CreateTicket("sms",sessionid,sessiondata["CompanyId"],sessiondata["TenantId"],smsData["type"], smsData["subject"], smsData["description"],smsData["priority"],smsData["tags"],function(success, result){});
 
+                                                UploadAttachments(data.messageId, data.attachments, orgs.tenant, orgs.id, function (attachmentIds) {
+
                                                 if(data.inReplyTo && data.inReplyTo.length > 0){
 
                                                     try {
-                                                        CreateComment('email','text',data.company, data.tenant, data.inReplyTo[0], result, function (done) {
+                                                        var commentCb = function (done) {
                                                             if (done) {
                                                                 logger.debug("comment created successfully");
+                                                                AddAttachmentsToTicket({engagement_session: data.inReplyTo[0]}, attachmentIds);
 
                                                             }else{
                                                                 logger.error("comment creation failed");
                                                             }
-                                                        });
+                                                        };
+
+                                                        if (attachmentIds && attachmentIds.length > 0) {
+                                                            CreateCommentWithAttachments('email','text',data.company, data.tenant, data.inReplyTo[0], result, attachmentIds, commentCb);
+                                                        } else {
+                                                            CreateComment('email','text',data.company, data.tenant, data.inReplyTo[0], result, commentCb);
+                                                        }
                                                     }catch(ex){
                                                         logger.error("Error in comment ", ex);
                                                     }
@@ -137,14 +166,21 @@ var func = function (connection, data, content) {
                                                             logger.debug("comment");
 
                                                             try {
-                                                                CreateCommentByReference('email','text',data.company, data.tenant, arr[1], result, function (done) {
+                                                                var commentByRefCb = function (done) {
                                                                     if (done) {
                                                                         logger.debug("comment created successfully");
+                                                                        AddAttachmentsToTicket({reference: arr[1]}, attachmentIds);
 
                                                                     }else{
                                                                         logger.error("comment creation failed");
                                                                     }
-                                                                });
+                                                                };
+
+                                                                if (attachmentIds && attachmentIds.length > 0) {
+                                                                    CreateCommentByReferenceWithAttachments('email','text',data.company, data.tenant, arr[1], result, attachmentIds, commentByRefCb);
+                                                                } else {
+                                                                    CreateCommentByReference('email','text',data.company, data.tenant, arr[1], result, commentByRefCb);
+                                                                }
                                                             }catch(ex){
                                                                 logger.error("Error in comment ", ex);
                                                             }
@@ -193,6 +229,8 @@ var func = function (connection, data, content) {
 
                                                     }
                                                 }
+
+                                                });
 
                                                 //////////////////////////////////////first check in comments and update them////////////////////////////////////////////////////////////////
 

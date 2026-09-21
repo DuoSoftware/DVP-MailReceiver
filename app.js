@@ -4,6 +4,8 @@
 var logger = require('dvp-common/LogHandler/CommonLogHandler.js').logger;
 var config = require('config');
 var util = require('util');
+var restify = require('restify');
+var bodyParser = require('body-parser');
 var Email = require('dvp-mongomodels/model/Email').Email;
 
 
@@ -80,6 +82,54 @@ process.on('SIGINT', function() {
         console.log('Mongoose default connection disconnected through app termination');
         process.exit(0);
     });
+});
+
+
+var server = restify.createServer({
+    name: 'DVP-MailReceiver'
+});
+
+server.use(restify.CORS());
+server.use(restify.fullResponse());
+server.pre(restify.pre.userAgentConnection());
+
+server.use(restify.acceptParser(server.acceptable));
+server.use(restify.queryParser());
+server.use(bodyParser.json());
+
+server.get("/health/live", function (req, res, next) {
+    res.send(200, "live");
+    return next();
+});
+
+// Sends a reply email threaded against an existing conversation.
+// Body: { to, from, subject, body, company, tenant, inReplyTo, references, template, Parameters, attachments, engagement }
+// inReplyTo must be the Message-ID of the email this is replying to, so the reply lands in the same thread.
+server.post('/DVP/API/:version/Email/Reply', function (req, res, next) {
+
+    if (!smtpconnector) {
+        res.send(503, {IsSuccess: false, Message: "SMTP sender is disabled on this instance"});
+        return next();
+    }
+
+    if (!req.body || !req.body.inReplyTo) {
+        res.send(400, {IsSuccess: false, Message: "'inReplyTo' (Message-ID of the email being replied to) is required"});
+        return next();
+    }
+
+    smtpconnector.SendReplyEmail(req.body, function (success, result) {
+        if (success) {
+            res.send(200, {IsSuccess: true, Result: result});
+        } else {
+            res.send(400, {IsSuccess: false, Message: result});
+        }
+        return next();
+    });
+});
+
+var port = config.Host.port || 3000;
+server.listen(port, function () {
+    logger.info("DVP-MailReceiver Server %s listening at %s", server.name, server.url);
 });
 
 
