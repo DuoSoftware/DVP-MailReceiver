@@ -39,10 +39,10 @@ Infrastructure, other services' addresses and platform settings. Other services 
 | `SYS_LITETICKET_PORT` | Port of DVP-LiteTicket; added to the URL only when SYS_DYNAMIC_PORT_ENABLED is true. | port | 1–65535 | 3636 | no | no |
 | `SYS_LITETICKET_VERSION` | API version used in DVP-LiteTicket URLs. | version | version string, e.g. 1.0.0.0 | 1.0.0.0 | no | no |
 | `SYS_MONGO_DB` | MongoDB database name. | string | database name | dvpdb | no | no |
-| `SYS_MONGO_HOST` | MongoDB host(s). | host | host name or IP; comma-separated list for a replica set | (environment-specific) | yes | no |
-| `SYS_MONGO_PASSWORD` | MongoDB password. | string | password | `<secret>` | yes | yes |
+| `SYS_MONGO_HOST` | MongoDB host(s). | host | host name or IP; comma-separated list for a replica set | — | yes | no |
+| `SYS_MONGO_PASSWORD` | MongoDB password. | string | password | — | yes | yes |
 | `SYS_MONGO_PORT` | MongoDB port. | port | 1–65535; leave empty for mongodb+srv | 27017 | no | no |
-| `SYS_MONGO_USER` | MongoDB user. | string | user name | duo | no | no |
+| `SYS_MONGO_USER` | MongoDB user. | string | user name | — | yes | no |
 | `SYS_SCHEDULEWORKER_HOST` | Host other services use to call DVP-ScheduleWorker. | host | host name or IP, e.g. scheduleworker.internal | (environment-specific) | yes | no |
 | `SYS_SCHEDULEWORKER_PORT` | Port of DVP-ScheduleWorker; added to the URL only when SYS_DYNAMIC_PORT_ENABLED is true. | port | 1–65535 | 8080 | no | no |
 | `SYS_SCHEDULEWORKER_VERSION` | API version used in DVP-ScheduleWorker URLs. | version | version string, e.g. 1.0.0.0 | 1.0.0.0 | no | no |
